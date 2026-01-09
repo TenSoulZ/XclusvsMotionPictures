@@ -1,0 +1,17 @@
+services:
+  # Backend: Django
+  - type: web
+    name: xmp-backend
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn xmp_backend.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*" # Update this after deployment to your specific domain
+    autoDeploy: false
