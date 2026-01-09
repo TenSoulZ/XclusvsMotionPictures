@@ -1,0 +1,13 @@
+[build]
+  # Directory to change to before starting the build
+  base = "frontend"
+  # Directory that contains the deploy-ready HTML files and assets, relative to 'base'
+  publish = "dist"
+  # Default build command
+  command = "npm install && npm run build"
+
+# Redirect all traffic to index.html to let React Router handle routing (SPA Support)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
