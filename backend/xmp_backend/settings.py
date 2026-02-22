@@ -63,8 +63,12 @@ MIDDLEWARE = [
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='', cast=Csv())
-    CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='', cast=Csv())
+    # Strip trailing slashes to satisfy corsheaders.E014
+    CORS_ALLOWED_ORIGINS_RAW = config('CORS_ALLOWED_ORIGINS', default='', cast=Csv())
+    CORS_ALLOWED_ORIGINS = [origin.rstrip('/') for origin in CORS_ALLOWED_ORIGINS_RAW]
+    
+    CSRF_TRUSTED_ORIGINS_RAW = config('CSRF_TRUSTED_ORIGINS', default='', cast=Csv())
+    CSRF_TRUSTED_ORIGINS = [origin.rstrip('/') for origin in CSRF_TRUSTED_ORIGINS_RAW]
 
 ROOT_URLCONF = 'xmp_backend.urls'
 
