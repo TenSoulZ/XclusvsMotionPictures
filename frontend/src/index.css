@@ -98,6 +98,7 @@ h6,
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px; /* Added height for horizontal scroll */
 }
 
 ::-webkit-scrollbar-track {
@@ -168,9 +169,9 @@ h6,
 
 /* Glassmorphism Card */
 .glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(20, 20, 20, 0.9);
+  /* backdrop-filter: blur(12px); Performance optimization */
+  /* -webkit-backdrop-filter: blur(12px); */
   border: 1px solid var(--glass-border);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   border-radius: 16px;
@@ -205,8 +206,8 @@ h6,
 
 /* Navbar Scrolled State */
 .navbar-scrolled {
-  background: rgba(10, 10, 10, 0.9) !important;
-  backdrop-filter: blur(10px);
+  background: rgba(10, 10, 10, 0.95) !important;
+  /* backdrop-filter: blur(10px); Performance optimization */
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -344,8 +345,8 @@ h6,
 /* XMP Modal Styling */
 .xmp-modal .modal-content {
   background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  /* backdrop-filter: blur(20px); */
+  /* -webkit-backdrop-filter: blur(20px); */
   border: 1px solid var(--glass-border);
   border-radius: 20px;
   color: white;
@@ -369,8 +370,8 @@ h6,
 @media (max-width: 991.98px) {
   .navbar-collapse {
     background: rgba(10, 10, 10, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    /* backdrop-filter: blur(20px); */
+    /* -webkit-backdrop-filter: blur(20px); */
     padding: 2rem;
     border-radius: 20px;
     margin-top: 1rem;
@@ -410,7 +411,7 @@ h6,
   min-width: 40px;
   text-align: center;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  /* backdrop-filter: blur(10px); */
 }
 
 .custom-pagination .page-item.active .page-link {
@@ -434,7 +435,7 @@ h6,
 /* Toast Styling */
 .toast-container .toast {
   background: var(--glass-bg);
-  backdrop-filter: blur(20px);
+  /* backdrop-filter: blur(20px); */
   border: 1px solid var(--glass-border) !important;
   border-radius: 12px;
 }
@@ -624,4 +625,181 @@ h6,
 
 .nav-link.active {
   color: var(--brand-orange) !important;
+}
+
+/* Admin Dashboard Professional Styling */
+.admin-sidebar-card {
+  background: rgba(15, 15, 15, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.dashboard-stat-card {
+  background: linear-gradient(145deg, rgba(30, 30, 30, 0.9), rgba(20, 20, 20, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.dashboard-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--brand-orange-gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dashboard-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-stat-card:hover::before {
+  opacity: 1;
+}
+
+.sidebar-nav-link {
+  color: #a0a0a0;
+  font-weight: 500;
+  padding: 12px 20px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-nav-link:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: white;
+  padding-left: 25px;
+}
+
+.sidebar-nav-link.active {
+  background: linear-gradient(90deg, rgba(255, 102, 0, 0.15), transparent);
+  color: var(--brand-orange);
+  border-left-color: var(--brand-orange);
+  padding-left: 25px;
+}
+
+.admin-search-input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  height: 45px;
+  padding-left: 20px;
+}
+
+.admin-search-input:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--brand-orange) !important;
+  box-shadow: 0 0 0 4px rgba(255, 102, 0, 0.1) !important;
+}
+
+.table-action-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  color: #fff;
+}
+
+.table-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+/* Admin Table Specifics */
+.admin-table th {
+  background: transparent !important;
+  color: #888 !important;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 1.5rem 1rem !important;
+}
+
+.admin-table td {
+  vertical-align: middle !important;
+  padding: 1rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02) !important;
+  color: #e0e0e0;
+}
+
+.admin-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Mobile Responsive Admin Dashboard */
+@media (min-width: 768px) {
+  .admin-sidebar-container {
+    position: sticky;
+    top: 100px;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .admin-mobile-nav {
+    white-space: nowrap;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .admin-mobile-nav::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .admin-sidebar-container {
+    position: relative; /* Not sticky on mobile */
+    top: 0 !important;
+  }
+  
+  .sidebar-nav-link {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 8px;
+  }
+  
+  .sidebar-nav-link:hover {
+    padding-left: 12px; /* Reset hover movement */
+  }
+  
+  .sidebar-nav-link.active {
+    border-left: none;
+    border-bottom-color: var(--brand-orange);
+    padding-left: 12px;
+    background: linear-gradient(0deg, rgba(255, 102, 0, 0.15), transparent);
+  }
+  
+  .dashboard-stat-card {
+    padding: 1rem !important;
+  }
+  
+  .dashboard-stat-card .fs-1 {
+    font-size: 1.5rem !important;
+  }
+  
+  .dashboard-stat-card h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  .admin-search-input {
+    min-width: 100% !important;
+  }
+  
+  /* Hide text in sidebar items if screen is very small, keep icons? 
+     Or just let them scroll. Horizontal scroll is safer. */
 }

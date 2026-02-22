@@ -3,6 +3,7 @@ Models for the XMP Portfolio backend.
 Defines the data structure for categories, videos, photos, testimonials, and more.
 """
 from django.db import models
+from django.utils.text import slugify
 
 class Category(models.Model):
     """
@@ -10,7 +11,12 @@ class Category(models.Model):
     Used to organize both videos and photos.
     """
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -56,6 +62,7 @@ class ContactMessage(models.Model):
     """
     name = models.CharField(max_length=100)
     email = models.EmailField()
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
     subject = models.CharField(max_length=200)
     message = models.TextField()
     is_read = models.BooleanField(default=False)
@@ -113,7 +120,7 @@ class BlogPost(models.Model):
     Model for blog articles.
     """
     title = models.CharField(max_length=200)
-    slug = models.SlugField(unique=True, max_length=250)
+    slug = models.SlugField(unique=True, max_length=250, blank=True)
     content = models.TextField()
     featured_image = models.ImageField(upload_to='blog/')
     author_name = models.CharField(max_length=100, default='XMP Team')
@@ -126,6 +133,19 @@ class BlogPost(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        
+        # Ensure uniqueness
+        original_slug = self.slug
+        counter = 1
+        while BlogPost.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+            self.slug = f"{original_slug}-{counter}"
+            counter += 1
+            
+        super().save(*args, **kwargs)
 
 class LiveStream(models.Model):
     """

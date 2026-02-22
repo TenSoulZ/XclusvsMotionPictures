@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
+import { useLocation } from 'react-router-dom';
 
 const ParticlesBackground = () => {
     const [init, setInit] = useState(false);
+    const location = useLocation();
 
     useEffect(() => {
         initParticlesEngine(async (engine) => {
@@ -13,7 +15,7 @@ const ParticlesBackground = () => {
         });
     }, []);
 
-    const particlesLoaded = useCallback(async (container) => {
+    const particlesLoaded = useCallback(async () => {
         // console.log(container);
     }, []);
 
@@ -33,7 +35,7 @@ const ParticlesBackground = () => {
                         value: "transparent",
                     },
                 },
-                fpsLimit: 120,
+                fpsLimit: 60,
                 interactivity: {
                     events: {
                         onClick: {
@@ -74,7 +76,7 @@ const ParticlesBackground = () => {
                             default: "bounce",
                         },
                         random: false,
-                        speed: 1,
+                        speed: 0.6,
                         straight: false,
                     },
                     number: {
@@ -82,7 +84,7 @@ const ParticlesBackground = () => {
                             enable: true,
                             area: 800,
                         },
-                        value: 60,
+                        value: 30,
                     },
                     opacity: {
                         value: 0.3,

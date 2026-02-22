@@ -235,6 +235,7 @@ const Home = () => {
                                         src={getEmbedUrl(activeStream.stream_url) + "?autoplay=1&mute=1"} 
                                         title={activeStream.title} 
                                         allowFullScreen
+                                        loading="lazy"
                                         className="rounded-3 shadow-2xl"
                                     ></iframe>
                                 </div>
@@ -360,7 +361,7 @@ const Home = () => {
                                                     <VideoThumbnail video={featuredWork[0]} className="img-cover w-100 h-100 object-fit-cover" />
                                                 </div>
                                             ) : (
-                                                <img src={featuredWork[0].image} alt={featuredWork[0].title} className="img-cover w-100 h-100 object-fit-cover" />
+                                                <img src={featuredWork[0].image} alt={featuredWork[0].title} className="img-cover w-100 h-100 object-fit-cover" loading="lazy" />
                                             )}
                                             
                                             <div className="position-absolute bottom-0 start-0 w-100 p-5 bg-gradient-to-t" style={{ background: 'linear-gradient(to top, black, transparent)' }}>
@@ -373,7 +374,7 @@ const Home = () => {
                                 {/* Secondary Items (Right Stack) */}
                                 <Col md={4}>
                                     <div className="d-flex flex-column gap-4 h-100">
-                                        {featuredWork.slice(1, 3).map((item, index) => (
+                                        {featuredWork.slice(1, 3).map((item) => (
                                             <motion.div 
                                                 key={item.id}
                                                 whileHover={{ scale: 0.98 }}
@@ -383,7 +384,7 @@ const Home = () => {
                                                 {item.video_url ? (
                                                      <VideoThumbnail video={item} className="img-cover w-100 h-100 object-fit-cover" />
                                                 ) : (
-                                                    <img src={item.image} alt={item.title} className="img-cover w-100 h-100 object-fit-cover" />
+                                                    <img src={item.image} alt={item.title} className="img-cover w-100 h-100 object-fit-cover" loading="lazy" />
                                                 )}
                                                 <div className="position-absolute bottom-0 start-0 w-100 p-4" style={{ background: 'linear-gradient(to top, black, transparent)' }}>
                                                     <h5 className="text-white mb-0">{item.title}</h5>
@@ -437,6 +438,7 @@ const Home = () => {
                                                     alt={brand.name} 
                                                     className="brand-logo-img"
                                                     title={brand.name}
+                                                    loading="lazy"
                                                 />
                                             </a>
                                         ) : (
@@ -446,6 +448,7 @@ const Home = () => {
                                                     alt={brand.name} 
                                                     className="brand-logo-img"
                                                     title={brand.name}
+                                                    loading="lazy"
                                                 />
                                             </div>
                                         )}
@@ -491,6 +494,7 @@ const Home = () => {
                                                     width="60" 
                                                     height="60" 
                                                     alt={testimonials[currentTesti].client_name} 
+                                                    loading="lazy"
                                                 />
                                             ) : (
                                                 <div className="rounded-circle bg-orange bg-opacity-20 d-flex align-items-center justify-content-center text-orange shadow-lg" style={{ width: '60px', height: '60px' }}>
@@ -582,6 +586,7 @@ const Home = () => {
                                                     src={post.featured_image} 
                                                     alt={post.title} 
                                                     className="w-100 h-100 object-fit-cover transition-transform"
+                                                    loading="lazy"
                                                 />
                                             </div>
                                             <div className="p-4 bg-transparent">

@@ -24,7 +24,7 @@ ALLOWED_HOSTS=localhost,127.0.0.1,__YOUR_BACKEND_DOMAIN__
 # ----------------------
 # Comma-separated list of domains your frontend is running on
 # Example: https://www.xclusvsmotionpictures.com,https://xmp-frontend.vercel.app
-CORS_ALLOWED_ORIGINS=http://localhost:5173,__YOUR_FRONTEND_URL__
+CORS_ALLOWED_ORIGINS=http://localhost:5173,__YOUR_FRONTEND_U v  RL__
 CSRF_TRUSTED_ORIGINS=http://localhost:5173,__YOUR_FRONTEND_URL__
 
 # ----------------------

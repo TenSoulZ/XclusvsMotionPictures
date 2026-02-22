@@ -3,6 +3,7 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 import { motion } from 'framer-motion';
 import SEO from '../components/SEO';
 import api from '../utils/api';
+import Skeleton from '../components/Skeleton';
 /**
  * About component - Tells the story of Xclusvs Motion Pictures.
  * Displays company mission, process, expertise, and team members.
@@ -57,7 +58,7 @@ const About = () => {
                         <Col lg={6}>
                              <div className="position-relative">
                                  <div className="position-absolute top-0 start-0 w-100 h-100 border border-orange border-2 rounded-4" style={{ transform: 'translate(20px, 20px)', zIndex: 0 }}></div>
-                                 <img src="https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="High-end Cinema Camera" className="img-fluid rounded-4 position-relative z-1 shadow-lg" />
+                                 <img src="https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="High-end Cinema Camera" className="img-fluid rounded-4 position-relative z-1 shadow-lg" loading="lazy" />
                              </div>
                         </Col>
                     </Row>
@@ -124,14 +125,18 @@ const About = () => {
                     <h2 className="text-center mb-5 display-4 fw-bold">CREATIVE <span className="text-orange">MINDS</span></h2>
                     <Row className="g-4">
                         {loading ? (
-                             <div className="text-secondary text-center w-100">Loading team...</div>
+                            Array.from({ length: 3 }).map((_, idx) => (
+                                <Col md={4} key={idx}>
+                                    <Skeleton type="card" />
+                                </Col>
+                            ))
                         ) : team.length > 0 ? (
                             team.map((member, idx) => (
                                 <Col md={4} key={member.id || idx}>
                                     <div className="text-center group">
                                         <div className="position-relative d-inline-block mb-3 overflow-hidden rounded-circle" style={{ width: '200px', height: '200px' }}>
                                             {member.image ? (
-                                                <img src={member.image} alt={member.name} className="img-cover w-100 h-100 object-fit-cover" />
+                                                <img src={member.image} alt={member.name} className="img-cover w-100 h-100 object-fit-cover" loading="lazy" />
                                             ) : (
                                                 <div className="w-100 h-100 bg-secondary d-flex align-items-center justify-content-center text-white display-4">
                                                     {member.name.charAt(0)}

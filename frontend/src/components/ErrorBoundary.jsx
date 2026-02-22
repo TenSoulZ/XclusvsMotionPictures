@@ -8,7 +8,7 @@ class ErrorBoundary extends React.Component {
         this.state = { hasError: false, error: null, errorInfo: null };
     }
 
-    static getDerivedStateFromError(error) {
+    static getDerivedStateFromError(_error) {
         // Update state so the next render will show the fallback UI
         return { hasError: true };
     }
@@ -53,7 +53,7 @@ class ErrorBoundary extends React.Component {
                                 Reload Page
                             </Button>
                         </div>
-                        {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
+                        {import.meta.env.DEV && this.state.errorInfo && (
                             <details className="mt-4 text-start">
                                 <summary className="text-secondary cursor-pointer">
                                     Stack Trace (Development Only)

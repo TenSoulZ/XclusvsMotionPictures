@@ -35,6 +35,12 @@
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2"
   },
+  "overrides": {
+    "react-helmet-async": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
+  },
   "lint-staged": {
     "src/**/*.{js,jsx}": [
       "eslint --fix"

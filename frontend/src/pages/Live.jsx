@@ -44,7 +44,7 @@ const Live = () => {
         }
     };
 
-    const fetchLiveStreams = async () => {
+    const fetchLiveStreams = React.useCallback(async () => {
         try {
             const res = await api.get('/live/');
             const allStreams = res.data.results || res.data;
@@ -52,22 +52,25 @@ const Live = () => {
             
             setStreams(activeStreams);
             
-            // If we don't have a selected stream yet, or the selected one is no longer live
-            if (!selectedStream || !activeStreams.find(s => s.id === selectedStream.id)) {
-                setSelectedStream(activeStreams[0] || allStreams[0] || null);
-            }
+            setSelectedStream(currentSelected => {
+                // If we don't have a selected stream yet, or the selected one is no longer live
+                if (!currentSelected || !activeStreams.find(s => s.id === currentSelected.id)) {
+                    return activeStreams[0] || allStreams[0] || null;
+                }
+                return currentSelected;
+            });
         } catch (error) {
             console.error("Error fetching live streams:", error);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     React.useEffect(() => {
         fetchLiveStreams();
         const interval = setInterval(fetchLiveStreams, 30000);
         return () => clearInterval(interval);
-    }, []);
+    }, [fetchLiveStreams]);
 
     if (loading) return <Loader fullPage />;
 
@@ -99,6 +102,7 @@ const Live = () => {
                                                     title={selectedStream.title}
                                                     allowFullScreen
                                                     allow="autoplay; encrypted-media"
+                                                    loading="lazy"
                                                     className="border-0"
                                                 ></iframe>
                                             ) : (

@@ -8,7 +8,7 @@ const Loader = ({ fullPage = false }) => {
                 <div className="spinner mb-4">
                     <img 
                         src={logoOrange} 
-                        alt="XMP" 
+                        alt="XMP Logo" 
                         className="loader-logo-spinner" 
                         width="60"
                     />

@@ -101,23 +101,23 @@ const Gallery = () => {
         setCurrentPage(1);
     };
 
-    const handleNext = () => {
-        const currentIndex = photos.findIndex(p => p.id === selectedPhoto.id);
+    const handleNext = React.useCallback(() => {
+        const currentIndex = photos.findIndex(p => p.id === selectedPhoto?.id);
         if (currentIndex < photos.length - 1) {
             setSelectedPhoto(photos[currentIndex + 1]);
         } else {
             setSelectedPhoto(photos[0]); // Loop to beginning
         }
-    };
+    }, [photos, selectedPhoto]);
 
-    const handlePrev = () => {
-        const currentIndex = photos.findIndex(p => p.id === selectedPhoto.id);
+    const handlePrev = React.useCallback(() => {
+        const currentIndex = photos.findIndex(p => p.id === selectedPhoto?.id);
         if (currentIndex > 0) {
             setSelectedPhoto(photos[currentIndex - 1]);
         } else {
             setSelectedPhoto(photos[photos.length - 1]); // Loop to end
         }
-    };
+    }, [photos, selectedPhoto]);
 
     const [touchStart, setTouchStart] = useState(null);
     const [touchEnd, setTouchEnd] = useState(null);
@@ -155,7 +155,7 @@ const Gallery = () => {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedPhoto, photos]);
+    }, [selectedPhoto, handleNext, handlePrev]);
 
 
     return (

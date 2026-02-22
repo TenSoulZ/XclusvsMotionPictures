@@ -35,8 +35,23 @@ api.interceptors.response.use(
     (error) => {
         // Handle common error codes (401 Unauthorized, etc.)
         if (error.response && error.response.status === 401) {
-            // Optional: Logout user or redirect to login
-            console.error('Unauthorized access - potential session expiry.');
+            console.error('Unauthorized access - session expired or invalid token.');
+            localStorage.removeItem('token');
+            
+            // Avoid redirect loops if already on login page
+            if (!window.location.pathname.includes('/login')) {
+                window.location.href = '/login';
+            }
+        } else if (error.response && error.response.status === 500) {
+            console.error('Server error - potentially caused by invalid session state.');
+            // If we are getting 500s and have a token, it might be a corrupted session/token
+            // causing the backend to crash. Safe to clear and redirect to login to reset state.
+            if (localStorage.getItem('token')) {
+                localStorage.removeItem('token');
+                if (!window.location.pathname.includes('/login')) {
+                    window.location.href = '/login';
+                }
+            }
         }
         return Promise.reject(error);
     }

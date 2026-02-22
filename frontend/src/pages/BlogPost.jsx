@@ -7,6 +7,7 @@ import SEO from '../components/SEO';
 import Loader from '../components/Loader';
 import Skeleton from '../components/Skeleton';
 import { FaCalendarAlt, FaUser, FaArrowLeft, FaShareAlt } from 'react-icons/fa';
+import { useToast } from '../contexts/ToastContext';
 
 /**
  * BlogPost component - Displays the full content of a single blog article.
@@ -14,10 +15,37 @@ import { FaCalendarAlt, FaUser, FaArrowLeft, FaShareAlt } from 'react-icons/fa';
 const BlogPost = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
+    const toast = useToast();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [relatedPosts, setRelatedPosts] = useState([]);
 
+    const handleShare = async () => {
+        if (!post) return;
+        
+        const shareData = {
+            title: `${post.title} | Xclusvs Motion Pictures`,
+            text: post.content.substring(0, 100) + '...',
+            url: window.location.href,
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+                toast.success("Post shared successfully!");
+            } else {
+                await navigator.clipboard.writeText(window.location.href);
+                toast.info("Link copied to clipboard!");
+            }
+        } catch (error) {
+            console.error("Error sharing:", error);
+            if (error.name !== 'AbortError') {
+                toast.error("Sharing failed. Link copied to clipboard as a fallback.");
+                navigator.clipboard.writeText(window.location.href);
+            }
+        }
+    };
+	
     useEffect(() => {
         const fetchPost = async () => {
             try {
@@ -148,6 +176,7 @@ const BlogPost = () => {
                                 variant="dark" 
                                 className="rounded-circle border-secondary" 
                                 aria-label="Share this post"
+                                onClick={handleShare}
                             >
                                 <FaShareAlt size={16}/>
                             </Button>
@@ -161,7 +190,7 @@ const BlogPost = () => {
                     <div className="mt-5 pt-5 border-top border-secondary border-opacity-10">
                         <h3 className="fw-bold mb-4 text-white">RELATED <span className="opacity-25">STORIES</span></h3>
                         <Row className="g-4">
-                            {relatedPosts.map((rPost, idx) => (
+                            {relatedPosts.map((rPost) => (
                                 <Col key={rPost.id} md={4}>
                                     <motion.div
                                         whileHover={{ y: -10 }}

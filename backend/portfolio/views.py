@@ -2,13 +2,19 @@
 API ViewSets for the XMP Portfolio backend.
 Handles the logic for CRUD operations and custom actions like newsletter broadcasts.
 """
-from rest_framework import viewsets, permissions, filters, status
+import logging
+from rest_framework import viewsets, permissions, filters, status, views
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Category, Video, Photo, ContactMessage, Brand, Testimonial, BlogPost, LiveStream, TeamMember, PricingPlan, NewsletterSubscriber
 from .serializers import CategorySerializer, VideoSerializer, PhotoSerializer, ContactMessageSerializer, BrandSerializer, TestimonialSerializer, BlogPostSerializer, LiveStreamSerializer, TeamMemberSerializer, PricingPlanSerializer, NewsletterSubscriberSerializer
+from .permissions import IsAdminOrReadOnly, AllowAnyCreateOrIsAuthenticated, AllowAnyCreateOrIsAdmin
+
+logger = logging.getLogger(__name__)
 
 class ContactMessageViewSet(viewsets.ModelViewSet):
     """
@@ -18,12 +24,8 @@ class ContactMessageViewSet(viewsets.ModelViewSet):
     """
     queryset = ContactMessage.objects.all().order_by('-created_at')
     serializer_class = ContactMessageSerializer
+    permission_classes = [AllowAnyCreateOrIsAdmin]
     
-    def get_permissions(self):
-        if self.action == 'create':
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
-
     def perform_create(self, serializer):
         """
         Custom create logic to trigger an email notification.
@@ -32,7 +34,7 @@ class ContactMessageViewSet(viewsets.ModelViewSet):
         from .utils import send_contact_notification
         send_contact_notification(instance)
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=True, methods=['post'], permission_classes=[IsAdminUser])
     def respond(self, request, pk=None):
         """
         Action to send a direct response to a contact message.
@@ -45,9 +47,13 @@ class ContactMessageViewSet(viewsets.ModelViewSet):
             return Response({"error": "Response content is required."}, status=status.HTTP_400_BAD_REQUEST)
         
         from .utils import send_admin_response
-        if send_admin_response(instance, response_content):
-            return Response({"status": "Response sent successfully!"})
-        else:
+        try:
+            if send_admin_response(instance, response_content):
+                return Response({"status": "Response sent successfully!"})
+            else:
+                raise Exception("Email sending failed for an unknown reason")
+        except Exception as e:
+            logger.error(f"Failed to send email response to {instance.email}: {e}")
             return Response({"error": "Failed to send email. Please check server settings."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class NewsletterSubscriberViewSet(viewsets.ModelViewSet):
@@ -56,13 +62,9 @@ class NewsletterSubscriberViewSet(viewsets.ModelViewSet):
     """
     queryset = NewsletterSubscriber.objects.all().order_by('-created_at')
     serializer_class = NewsletterSubscriberSerializer
+    permission_classes = [AllowAnyCreateOrIsAdmin]
 
-    def get_permissions(self):
-        if self.action == 'create':
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
-
-    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=False, methods=['post'], permission_classes=[IsAdminUser])
     def broadcast(self, request):
         """
         Broadcasts a newsletter to all active subscribers.
@@ -80,9 +82,13 @@ class NewsletterSubscriberViewSet(viewsets.ModelViewSet):
             return Response({"status": "No active subscribers to send to."})
 
         from .utils import broadcast_newsletter
-        if broadcast_newsletter(subject, content, recipient_list):
-            return Response({"status": f"Successfully sent newsletter to {len(recipient_list)} subscribers."})
-        else:
+        try:
+            if broadcast_newsletter(subject, content, recipient_list):
+                return Response({"status": f"Successfully sent newsletter to {len(recipient_list)} subscribers."})
+            else:
+                raise Exception("Newsletter broadcast failed for an unknown reason")
+        except Exception as e:
+            logger.error(f"Failed to broadcast newsletter: {e}")
             return Response({"error": "Failed to send newsletter."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class TeamMemberViewSet(viewsets.ModelViewSet):
@@ -93,11 +99,7 @@ class TeamMemberViewSet(viewsets.ModelViewSet):
     queryset = TeamMember.objects.all().order_by('created_at')
     serializer_class = TeamMemberSerializer
     pagination_class = None
-
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [IsAdminOrReadOnly]
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
@@ -106,24 +108,20 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = None
+    permission_classes = [IsAdminOrReadOnly]
 
 class VideoViewSet(viewsets.ModelViewSet):
     """
     ViewSet for video projects.
     Supports filtering by category and featured status, and searching by title/description.
     """
-    queryset = Video.objects.all().order_by('-created_at')
+    queryset = Video.objects.select_related('category').all().order_by('-created_at')
     serializer_class = VideoSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category__name', 'is_featured']
     search_fields = ['title', 'description']
     ordering_fields = ['created_at', 'title']
-    
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
-    
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class PhotoViewSet(viewsets.ModelViewSet):
@@ -131,18 +129,13 @@ class PhotoViewSet(viewsets.ModelViewSet):
     ViewSet for photo projects.
     Supports filtering, searching, and ordering.
     """
-    queryset = Photo.objects.all().order_by('-created_at')
+    queryset = Photo.objects.select_related('category').all().order_by('-created_at')
     serializer_class = PhotoSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category__name', 'is_featured']
     search_fields = ['title', 'description']
     ordering_fields = ['created_at', 'title']
-    
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
-    
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class BrandViewSet(viewsets.ModelViewSet):
@@ -152,11 +145,7 @@ class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all().order_by('-created_at')
     serializer_class = BrandSerializer
     pagination_class = None
-    
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [IsAdminOrReadOnly]
 
 class TestimonialViewSet(viewsets.ModelViewSet):
     """
@@ -165,11 +154,7 @@ class TestimonialViewSet(viewsets.ModelViewSet):
     queryset = Testimonial.objects.all().order_by('-created_at')
     serializer_class = TestimonialSerializer
     pagination_class = None
-    
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [IsAdminOrReadOnly]
 
 class BlogPostViewSet(viewsets.ModelViewSet):
     """
@@ -184,11 +169,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'content']
     ordering_fields = ['created_at', 'title']
     lookup_field = 'slug'
-
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
         queryset = BlogPost.objects.all().order_by('-created_at')
@@ -202,11 +183,7 @@ class LiveStreamViewSet(viewsets.ModelViewSet):
     """
     queryset = LiveStream.objects.all().order_by('-created_at')
     serializer_class = LiveStreamSerializer
-
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+    permission_classes = [IsAdminOrReadOnly]
 
 class PricingPlanViewSet(viewsets.ModelViewSet):
     """
@@ -215,8 +192,22 @@ class PricingPlanViewSet(viewsets.ModelViewSet):
     queryset = PricingPlan.objects.all().order_by('service_type', 'order')
     serializer_class = PricingPlanSerializer
     pagination_class = None
+    permission_classes = [IsAdminOrReadOnly]
 
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+class CurrentUserView(views.APIView):
+    """
+    View to retrieve the currently authenticated user's details.
+    Used for session verification on the frontend.
+    Enforces TokenAuthentication to prevent session-based bypass (e.g. Django Admin).
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
+            'is_staff': request.user.is_staff,
+            'is_superuser': request.user.is_superuser
+        })

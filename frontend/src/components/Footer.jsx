@@ -20,6 +20,7 @@ const Footer = () => {
                             alt="XMP Logo" 
                             height="50" 
                             className="mb-3"
+                            loading="lazy"
                         />
                         <p className="text-white-50">
                             Established in 2017, Xclusvs Motion Pictures is a dynamic production company specializing in video, photography, and web solutions in Zimbabwe and beyond.

@@ -129,11 +129,16 @@ The project follows a decoupled architecture:
 
 ## Recent Improvements & Refactoring
 
+### Admin Portal & Security (Latest Update)
+- **Separate Portal Architecture**: The Admin Portal (`/admin` and `/login`) is now architecturally separated from the public website layout. It uses a dedicated clean layout without the public navigation bar or footer, creating a focused, professional workspace.
+- **Strict Authentication**: Implemented a rigorous security model where the frontend strictly verifies the user's session with the backend using a dedicated endpoint (`/api/me/`).
+- **No Bypass**: The backend endpoint (`/api/me/`) enforces `TokenAuthentication`, effectively preventing access via shared Django Admin session cookies. Access to the React Admin Panel is exclusively granted via tokens obtained through the portal's login form.
+- **Enhanced Navigation**: Added "View Site" and "Log Out" functionality directly within the Admin Dashboard sidebar for better usability.
+
 ### Frontend Clean-up
-- **Admin Dashboard**: The `AdminDashboard.jsx` component was refactored from a 1000+ line monolith into smaller, manageable sub-components:
-    - `DashboardTable.jsx`: Handles data display and rendering logic for multiple content types.
-    - `DashboardModal.jsx`: Manages complex form logic and validation for adding/editing content.
-- **Documentation**: Comprehensive JSDoc comments added to core components (`Home.jsx`, `Navbar.jsx`, `Footer.jsx`, `AdminDashboard.jsx`) to improve maintainability and onboarding.
+- **Admin Dashboard**: The `AdminDashboard.jsx` component was refactored into smaller, manageable sub-components (`DashboardTable.jsx`, `DashboardModal.jsx`).
+- **Documentation**: Comprehensive JSDoc comments added to core components to improve maintainability.
+- **Code Cleanup**: Removed unused temporary files and logs.
 
 ### Backend Documentation
 - Added detailed docstrings to all `models.py`, `views.py`, and `serializers.py` to explain data structures, permissions, and business logic.

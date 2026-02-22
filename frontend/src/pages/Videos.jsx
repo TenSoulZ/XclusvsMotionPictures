@@ -248,7 +248,7 @@ const Videos = () => {
                             transition={{ duration: 0.3 }}
                         >
                             <Row>
-                                {videos.length > 0 ? videos.map((video, index) => (
+                                {videos.length > 0 ? videos.map((video) => (
                                     <Col md={6} lg={4} key={video.id} className="mb-4">
                                         <motion.div 
                                             variants={itemVariants}
@@ -319,6 +319,7 @@ const Videos = () => {
                                 title={selectedVideo.title} 
                                 allowFullScreen
                                 allow="autoplay; encrypted-media"
+                                loading="lazy"
                                 className="border-0"
                             ></iframe>
                         )}

@@ -4,7 +4,7 @@ Registers all ViewSets with the REST Framework DefaultRouter.
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CategoryViewSet, VideoViewSet, PhotoViewSet, ContactMessageViewSet, BrandViewSet, TestimonialViewSet, BlogPostViewSet, LiveStreamViewSet, TeamMemberViewSet, PricingPlanViewSet, NewsletterSubscriberViewSet
+from .views import CategoryViewSet, VideoViewSet, PhotoViewSet, ContactMessageViewSet, BrandViewSet, TestimonialViewSet, BlogPostViewSet, LiveStreamViewSet, TeamMemberViewSet, PricingPlanViewSet, NewsletterSubscriberViewSet, CurrentUserView
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet)
@@ -22,4 +22,5 @@ router.register(r'pricing-plans', PricingPlanViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('me/', CurrentUserView.as_view(), name='current-user'),
 ]

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Container, Button, Modal, Nav, Row, Col, Form } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import api from '../utils/api';
-import { FaPlus, FaTimesCircle, FaBroadcastTower, FaEye, FaVideo, FaImage, FaStar, FaPenNib, FaEnvelope, FaMoneyBillAlt, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaTimesCircle, FaBroadcastTower, FaEye, FaVideo, FaImage, FaStar, FaPenNib, FaEnvelope, FaMoneyBillAlt, FaTrash, FaSignOutAlt, FaExternalLinkAlt } from 'react-icons/fa';
 import { useToast } from '../contexts/ToastContext';
 import { validateImage, formatFileSize, createImagePreview } from '../utils/imageValidation';
 import { getEmbedUrl } from '../utils/videoUtils';
@@ -16,7 +18,9 @@ import DashboardModal from '../components/DashboardModal';
  */
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
     const toast = useToast();
+    const dashboardTopRef = useRef(null);
     const [activeTab, setActiveTab] = useState('dashboard');
     const [videos, setVideos] = useState([]);
     const [photos, setPhotos] = useState([]);
@@ -78,9 +82,15 @@ const AdminDashboard = () => {
     const [newsletterContent, setNewsletterContent] = useState('');
     const [isBroadcasting, setIsBroadcasting] = useState(false);
 
-    // Reset page when tab changes
+    // Reset page and scroll to top when tab changes
     useEffect(() => {
         setCurrentPage(1);
+        // Scroll the container into view
+        if (dashboardTopRef.current) {
+            dashboardTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        // Also try window scroll as backup
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [activeTab]);
 
     /**
@@ -153,17 +163,26 @@ const AdminDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeTab, currentPage]);
 
-    // Handle Toggle Featured
-    const handleToggleFeatured = async (id, currentStatus) => {
+    // Handle Toggle Featured (Optimistic Update)
+    const handleToggleFeatured = useCallback(async (id, currentStatus) => {
+        const toggle = (prev) => prev.map(item => item.id === id ? { ...item, is_featured: !currentStatus } : item);
+        const revert = (prev) => prev.map(item => item.id === id ? { ...item, is_featured: currentStatus } : item);
+
+        if (activeTab === 'videos') setVideos(toggle);
+        else if (activeTab === 'photos') setPhotos(toggle);
+
         try {
             await api.patch(`/${activeTab}/${id}/`, { is_featured: !currentStatus });
             toast.success(`Featured status updated successfully!`);
-            fetchContent();
         } catch (error) {
+            // Revert
+            if (activeTab === 'videos') setVideos(revert);
+            else if (activeTab === 'photos') setPhotos(revert);
+            
             console.error("Error updating featured status:", error);
             toast.error('Failed to update status. Please try again.');
         }
-    };
+    }, [activeTab, toast]);
 
     // Handle Delete Trigger
     const handleDeleteTrigger = (item) => {
@@ -172,7 +191,7 @@ const AdminDashboard = () => {
     };
 
     // Handle Add Trigger
-    const handleAddTrigger = () => {
+    const handleAddTrigger = useCallback(() => {
         setIsEditing(false);
         setEditId(null);
         setNewItem({ 
@@ -201,35 +220,9 @@ const AdminDashboard = () => {
         setImagePreview(null);
         setValidationErrors([]);
         setShowModal(true);
-    };
+    }, [categories]);
 
-    const handleEditTrigger = (item) => {
-        setIsEditing(true);
-        setEditId(item.id);
-        if (activeTab === 'live') {
-            setNewItem({
-                title: item.title,
-                description: item.description,
-                url: item.stream_url,
-                is_live: item.is_live,
-                scheduled_at: item.scheduled_at?.slice(0, 16) || '', // format for datetime-local
-            });
-        } else if (activeTab === 'pricing') {
-            setNewItem({
-                plan_name: item.plan_name,
-                service_type: item.service_type,
-                price: item.price,
-                features: item.features,
-                is_popular: item.is_popular,
-                order: item.order
-            });
-            setShowModal(true);
-        } else if (activeTab === 'messages') {
-            handleViewMessage(item);
-        }
-    };
-
-    const handleViewMessage = async (message) => {
+    const handleViewMessage = useCallback(async (message) => {
         setSelectedMessage(message);
         setShowViewMessageModal(true);
         
@@ -238,12 +231,84 @@ const AdminDashboard = () => {
             try {
                 await api.patch(`/contact/${message.id}/`, { is_read: true });
                 // Update local state to reflect read status
-                setMessages(messages.map(m => m.id === message.id ? { ...m, is_read: true } : m));
+                setMessages(prev => prev.map(m => m.id === message.id ? { ...m, is_read: true } : m));
             } catch (error) {
                 console.error("Error marking message as read:", error);
             }
         }
-    };
+    }, []);
+
+    const handleEditTrigger = useCallback((item) => {
+        setIsEditing(true);
+        setEditId(item.id);
+        setValidationErrors([]);
+        setImagePreview(null);
+        
+        if (activeTab === 'messages') {
+            handleViewMessage(item);
+            return;
+        }
+
+        // Base object with current item values where applicable
+        const baseItem = { 
+            title: item.title || item.name || '', 
+            description: item.description || item.content || '', 
+            url: '', 
+            image: null, 
+            category: item.category?.name?.toLowerCase() || 'wedding', 
+            is_featured: item.is_featured || false, 
+            website_url: '',
+            client_name: '',
+            client_role: '',
+            slug: '',
+            author_name: 'XMP Team',
+            is_published: true, 
+            is_live: false, 
+            scheduled_at: '', 
+            role: '', 
+            service_type: 'video', 
+            plan_name: '', 
+            price: '', 
+            features: '', 
+            order: 0,
+            is_popular: false
+        };
+
+        if (activeTab === 'videos') {
+            baseItem.url = item.video_url;
+        } else if (activeTab === 'photos') {
+            setImagePreview(item.image);
+        } else if (activeTab === 'brands') {
+            baseItem.website_url = item.website_url;
+            setImagePreview(item.logo);
+        } else if (activeTab === 'testimonials') {
+            baseItem.client_name = item.client_name;
+            baseItem.client_role = item.client_role;
+            setImagePreview(item.client_image);
+        } else if (activeTab === 'blog') {
+            baseItem.author_name = item.author_name;
+            baseItem.is_published = item.is_published;
+            baseItem.slug = item.slug;
+            setImagePreview(item.featured_image);
+        } else if (activeTab === 'live') {
+            baseItem.url = item.stream_url;
+            baseItem.is_live = item.is_live;
+            baseItem.scheduled_at = item.scheduled_at?.slice(0, 16) || '';
+        } else if (activeTab === 'team') {
+            baseItem.role = item.role;
+            setImagePreview(item.image);
+        } else if (activeTab === 'pricing') {
+            baseItem.plan_name = item.plan_name;
+            baseItem.service_type = item.service_type;
+            baseItem.price = item.price;
+            baseItem.features = item.features;
+            baseItem.is_popular = item.is_popular;
+            baseItem.order = item.order;
+        }
+
+        setNewItem(baseItem);
+        setShowModal(true);
+    }, [activeTab, handleViewMessage]);
 
     const handleSendResponse = async () => {
         if (!responseContent.trim()) return;
@@ -289,16 +354,28 @@ const AdminDashboard = () => {
     };
 
     const handleToggleLive = async (stream) => {
+        // Optimistic update
+        const originalStatus = stream.is_live;
+        setLiveStreams(prev => prev.map(s => s.id === stream.id ? { ...s, is_live: !originalStatus } : s));
+
         try {
-            await api.patch(`/live/${stream.id}/`, { is_live: !stream.is_live });
-            toast.success(`Stream ${!stream.is_live ? 'is now LIVE!' : 'has ended.'}`);
-            fetchContent();
+            await api.patch(`/live/${stream.id}/`, { is_live: !originalStatus });
+            toast.success(`Stream ${!originalStatus ? 'is now LIVE!' : 'has ended.'}`);
         } catch (error) {
+            // Revert
+            setLiveStreams(prev => prev.map(s => s.id === stream.id ? { ...s, is_live: originalStatus } : s));
+            console.error("Error toggling live status:", error);
             toast.error("Failed to update stream status.");
         }
     };
 
-    // Confirm Delete Action
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        toast.info('Logged out successfully.');
+        navigate('/login');
+    };
+
+    // Confirm Delete Action (Optimistic Update)
     const handleConfirmDelete = async () => {
         if (!itemToDelete) return;
         
@@ -306,16 +383,37 @@ const AdminDashboard = () => {
         const endpoint = activeTab === 'messages' ? `/contact/${id}/` :
                          activeTab === 'pricing' ? `/pricing-plans/${id}/` :
                          `/${activeTab}/${id}/`;
+
+        // Optimistically remove from UI
+        const removeFromState = (setItems) => {
+            setItems(prev => prev.filter(item => item.id !== id));
+        };
+
+        if (activeTab === 'videos') removeFromState(setVideos);
+        else if (activeTab === 'photos') removeFromState(setPhotos);
+        else if (activeTab === 'brands') removeFromState(setBrands);
+        else if (activeTab === 'messages') removeFromState(setMessages);
+        else if (activeTab === 'testimonials') removeFromState(setTestimonials);
+        else if (activeTab === 'blog') removeFromState(setBlogPosts);
+        else if (activeTab === 'live') removeFromState(setLiveStreams);
+        else if (activeTab === 'team') removeFromState(setTeam);
+        else if (activeTab === 'pricing') removeFromState(setPricingPlans);
+        else if (activeTab === 'newsletter') removeFromState(setSubscribers);
         
+        // Adjust total count
+        setTotalCount(prev => Math.max(0, prev - 1));
+
+        setShowDeleteModal(false); // Close modal immediately
+
         try {
             await api.delete(endpoint);
-            setShowDeleteModal(false);
             setItemToDelete(null);
             toast.success('Item deleted successfully!');
-            fetchContent();
         } catch (error) {
+            // Revert by re-fetching (simpler than storing deleted item to re-insert)
             console.error("Error deleting item:", error);
-            toast.error('Failed to delete item. Please try again.');
+            toast.error('Failed to delete item. Reloading...');
+            fetchContent(); 
         }
     };
 
@@ -494,27 +592,54 @@ const AdminDashboard = () => {
         return () => clearInterval(interval);
     }, []);
 
+    const filteredData = useMemo(() => {
+        const rawData = {
+            'videos': videos,
+            'photos': photos,
+            'brands': brands,
+            'messages': messages,
+            'testimonials': testimonials,
+            'blog': blogPosts,
+            'live': liveStreams,
+            'team': team,
+            'pricing': pricingPlans,
+            'newsletter': subscribers
+        }[activeTab] || [];
+        
+        if (!searchTerm) return rawData;
+        
+        const term = searchTerm.toLowerCase();
+        return rawData.filter(item => 
+            (item.title?.toLowerCase().includes(term)) || 
+            (item.name?.toLowerCase().includes(term)) || 
+            (item.client_name?.toLowerCase().includes(term)) ||
+            (item.plan_name?.toLowerCase().includes(term)) ||
+            (item.subject?.toLowerCase().includes(term)) ||
+            (item.message?.toLowerCase().includes(term))
+        );
+    }, [activeTab, videos, photos, brands, messages, testimonials, blogPosts, liveStreams, team, pricingPlans, subscribers, searchTerm]);
+
     const renderDashboardOverview = () => {
+        // Calculate unread count safely
+        const unreadCount = Array.isArray(messages) ? messages.filter(m => !m.is_read).length : 0;
+
         const stats = [
             { label: 'Videos', value: videos.length, icon: <FaVideo />, color: '#ff6600' },
             { label: 'Photos', value: photos.length, icon: <FaImage />, color: '#00ccff' },
             { label: 'Blog Posts', value: blogPosts.length, icon: <FaPenNib />, color: '#cc33ff' },
-            { label: 'Unread Leads', value: messages.filter(m => !m.is_read).length, icon: <FaEnvelope />, color: '#ff3333' },
+            { label: 'Unread Leads', value: unreadCount, icon: <FaEnvelope />, color: '#ff3333' },
         ];
 
         return (
             <div className="dashboard-overview">
                 <Row className="g-4 mb-5">
                     {stats.map((stat, idx) => (
-                        <Col key={idx} md={6} lg={3}>
-                            <motion.div 
-                                whileHover={{ y: -5 }}
-                                className="glass-card p-4 h-100 d-flex flex-column align-items-center text-center"
-                            >
+                        <Col key={idx} xs={6} md={6} lg={3}>
+                            <div className="dashboard-stat-card p-4 h-100 d-flex flex-column align-items-center text-center rounded-4">
                                 <div className="fs-1 mb-3" style={{ color: stat.color }}>{stat.icon}</div>
                                 <h2 className="display-5 fw-bold text-white mb-1">{stat.value}</h2>
                                 <p className="text-secondary text-uppercase small spacing-2 mb-0">{stat.label}</p>
-                            </motion.div>
+                            </div>
                         </Col>
                     ))}
                 </Row>
@@ -558,39 +683,56 @@ const AdminDashboard = () => {
     };
 
     return (
-        <Container fluid className="pt-5 mt-5 min-vh-100 px-lg-5">
+        <Container fluid className="py-4 min-vh-100 px-3 px-lg-5" ref={dashboardTopRef}>
             <Row>
                 {/* Sidebar */}
-                <Col lg={2} md={3} className="mb-4">
-                    <div className="glass-card p-3 sticky-top" style={{ top: '100px', zIndex: 10 }}>
-                        <div className="mb-4 px-2 text-center">
+                <Col lg={2} md={3} xs={12} className="mb-4">
+                    <div className="admin-sidebar-card py-4 admin-sidebar-container" style={{ borderRadius: '16px', zIndex: 10 }}>
+                        <div className="mb-3 mb-lg-5 px-4 text-center">
                             <img 
                                 src={logoOrange} 
                                 alt="XMP Logo" 
                                 width="60" 
                                 className="mb-3"
+                                loading="lazy"
                             />
                             <h5 className="fw-bold text-orange mb-1">CMS</h5>
                             <p className="small text-secondary mb-0">Dashboard</p>
                         </div>
-                        <Nav variant="pills" className="flex-column gap-2">
+                        <Nav className="flex-row flex-md-column gap-1 px-2 overflow-auto admin-mobile-nav">
                             {sidebarItems.map(item => (
                                 <Nav.Item key={item.id}>
                                     <Nav.Link 
                                         onClick={() => setActiveTab(item.id)}
-                                        className={`rounded-3 py-2 px-3 d-flex align-items-center gap-3 transition-all ${
-                                            activeTab === item.id ? 'bg-orange text-white' : 'text-secondary hover-bg-dark'
+                                        className={`sidebar-nav-link d-flex align-items-center gap-3 ${
+                                            activeTab === item.id ? 'active' : ''
                                         }`}
                                     >
-                                        <span className="fs-6">{item.icon}</span>
+                                        <span className="fs-5">{item.icon}</span>
                                         <span className="fw-medium">{item.label}</span>
                                     </Nav.Link>
                                 </Nav.Item>
                             ))}
                         </Nav>
-                        <div className="mt-5 pt-5 border-top border-secondary border-opacity-10 px-2 d-none d-md-block">
-                            <p className="small text-secondary mb-0 opacity-50">Xclusvs Motion Pictures</p>
-                            <p className="x-small text-secondary opacity-25">© 2025</p>
+                        <div className="mt-4 pt-4 border-top border-secondary border-opacity-10 px-2">
+                            <Nav className="flex-column gap-1">
+                                <Nav.Link 
+                                    onClick={() => navigate('/')}
+                                    className="sidebar-nav-link d-flex align-items-center gap-3 text-secondary mb-1"
+                                    title="Go to main website"
+                                >
+                                    <span className="fs-5"><FaExternalLinkAlt /></span>
+                                    <span className="fw-medium">View Site</span>
+                                </Nav.Link>
+                                <Nav.Link 
+                                    onClick={handleLogout}
+                                    className="sidebar-nav-link d-flex align-items-center gap-3 text-danger"
+                                    title="Sign out of admin panel"
+                                >
+                                    <span className="fs-5"><FaSignOutAlt /></span>
+                                    <span className="fw-medium">Log Out</span>
+                                </Nav.Link>
+                            </Nav>
                         </div>
                     </div>
                 </Col>
@@ -612,8 +754,8 @@ const AdminDashboard = () => {
                                         placeholder={`Search ${sidebarItems.find(i => i.id === activeTab)?.label?.toLowerCase()}...`}
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="bg-dark border-secondary text-white rounded-pill px-4 py-2 small search-input-cms"
-                                        style={{ minWidth: '250px' }}
+                                        className="admin-search-input rounded-pill small"
+                                        style={{ minWidth: '300px' }}
                                     />
                                     {searchTerm && (
                                         <FaTimesCircle 
@@ -649,32 +791,7 @@ const AdminDashboard = () => {
                         <>
                             <DashboardTable 
                                 activeTab={activeTab}
-                                data={(() => {
-                                    const rawData = {
-                                        'videos': videos,
-                                        'photos': photos,
-                                        'brands': brands,
-                                        'messages': messages,
-                                        'testimonials': testimonials,
-                                        'blog': blogPosts,
-                                        'live': liveStreams,
-                                        'team': team,
-                                        'pricing': pricingPlans,
-                                        'newsletter': subscribers
-                                    }[activeTab] || [];
-                                    
-                                    if (!searchTerm) return rawData;
-                                    
-                                    const term = searchTerm.toLowerCase();
-                                    return rawData.filter(item => 
-                                        (item.title?.toLowerCase().includes(term)) || 
-                                        (item.name?.toLowerCase().includes(term)) || 
-                                        (item.client_name?.toLowerCase().includes(term)) ||
-                                        (item.plan_name?.toLowerCase().includes(term)) ||
-                                        (item.subject?.toLowerCase().includes(term)) ||
-                                        (item.message?.toLowerCase().includes(term))
-                                    );
-                                })()}
+                                data={filteredData}
                                 onDelete={handleDeleteTrigger}
                                 onToggleFeatured={handleToggleFeatured}
                                 onToggleLive={handleToggleLive}
@@ -769,6 +886,7 @@ const AdminDashboard = () => {
                                 src={getEmbedUrl(previewStream.stream_url)} 
                                 title="Broadcast Preview"
                                 allowFullScreen
+                                loading="lazy"
                             ></iframe>
                         )}
                     </div>

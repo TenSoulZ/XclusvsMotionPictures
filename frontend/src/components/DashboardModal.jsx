@@ -303,22 +303,21 @@ const DashboardModal = ({
 
                             {imagePreview && (
                                 <div className="mt-3 text-center position-relative d-inline-block">
-                                    <img 
-                                        src={imagePreview} 
-                                        alt="Preview" 
-                                        className="rounded border border-secondary shadow-sm"
-                                        style={{ maxHeight: '200px', maxWidth: '100%' }} 
-                                    />
-                                    <Button 
-                                        variant="danger" 
-                                        size="sm" 
-                                        className="position-absolute top-0 end-0 rounded-circle translate-middle p-1"
-                                        onClick={() => {
-                                            setImagePreview(null);
-                                            setNewItem({...newItem, image: null});
-                                        }}
-                                    >
-                                        <FaTimesCircle />
+                                                                         <img 
+                                                                            src={imagePreview} 
+                                                                            alt="Image preview" 
+                                                                            className="rounded border border-secondary shadow-sm"
+                                                                            style={{ maxHeight: '200px', maxWidth: '100%' }} 
+                                                                        />                                                                         <Button 
+                                                                            variant="danger" 
+                                                                            size="sm" 
+                                                                            className="position-absolute top-0 end-0 rounded-circle translate-middle p-1"
+                                                                            aria-label="Remove image"
+                                                                            onClick={() => {
+                                                                                setImagePreview(null);
+                                                                                setNewItem({...newItem, image: null});
+                                                                            }}
+                                                                        >                                        <FaTimesCircle />
                                     </Button>
                                     <div className="small text-secondary mt-1">
                                         {newItem.image && formatFileSize(newItem.image.size)}

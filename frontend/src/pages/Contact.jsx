@@ -101,10 +101,10 @@ const Contact = () => {
                                         <div className="mt-5">
                                             <h5 className="fw-bold mb-3">Follow Us</h5>
                                             <div className="d-flex gap-3">
-                                                <a href="https://www.youtube.com/@xclusvsmotionpictures" target="_blank" rel="noopener noreferrer" className="text-white fs-4 bg-white bg-opacity-25 p-3 rounded-circle d-flex align-items-center justify-content-center hover-scale transition-all">
+                                                <a href="https://www.youtube.com/@xclusvsmotionpictures" target="_blank" rel="noopener noreferrer" aria-label="Visit our YouTube channel" className="text-white fs-4 bg-white bg-opacity-25 p-3 rounded-circle d-flex align-items-center justify-content-center hover-scale transition-all">
                                                     <FaYoutube />
                                                 </a>
-                                                <a href="https://www.facebook.com/xclusvsmotionpictures/" target="_blank" rel="noopener noreferrer" className="text-white fs-4 bg-white bg-opacity-25 p-3 rounded-circle d-flex align-items-center justify-content-center hover-scale transition-all">
+                                                <a href="https://www.facebook.com/xclusvsmotionpictures/" target="_blank" rel="noopener noreferrer" aria-label="Visit our Facebook page" className="text-white fs-4 bg-white bg-opacity-25 p-3 rounded-circle d-flex align-items-center justify-content-center hover-scale transition-all">
                                                     <FaFacebook />
                                                 </a>
                                             </div>

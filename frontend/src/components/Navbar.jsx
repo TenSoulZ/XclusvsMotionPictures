@@ -4,7 +4,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { FaInstagram, FaYoutube, FaFacebook, FaCircle } from 'react-icons/fa';
 import api from '../utils/api';
 import logoWhite from '../assets/logos/xmp-logo-white.png';
-import logoOrange from '../assets/logos/xmp-logo-orange.png';
 
 /**
  * Navigation component - Fixed top navigation bar.
