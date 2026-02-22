@@ -34,7 +34,6 @@ const Home = () => {
          */
         const fetchData = async () => {
             try {
-                setLoading(true);
                 // Fetch featured videos and photos simultaneously
                 const [vidRes, photoRes] = await Promise.all([
                     api.get('/videos/', { params: { is_featured: true } }),
@@ -85,7 +84,8 @@ const Home = () => {
         return () => clearInterval(timer);
     }, [testimonials.length]);
 
-    if (loading) return <Loader fullPage />;
+    // Don't block the whole page loading. Let the Hero load immediately.
+    // if (loading) return <Loader fullPage />;
 
     const businessSchema = {
         "@context": "https://schema.org",
