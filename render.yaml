@@ -3,6 +3,7 @@ services:
   - type: web
     name: xmp-backend
     env: python
+    rootDir: backend
     buildCommand: "./build.sh"
     startCommand: "gunicorn xmp_backend.wsgi:application"
     envVars:
@@ -13,5 +14,27 @@ services:
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        value: "*" # Update this after deployment to your specific domain
-    autoDeploy: false
+        value: "*"
+      - key: CORS_ALLOWED_ORIGINS
+        fromService:
+          type: static
+          name: xmp-frontend
+          property: url
+
+  # Frontend: React
+  - type: static
+    name: xmp-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    publishDir: "dist"
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: xmp-backend
+          property: url
