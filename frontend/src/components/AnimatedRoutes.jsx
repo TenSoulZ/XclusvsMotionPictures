@@ -47,7 +47,7 @@ const AnimatedRoutes = () => {
 
     return (
         <AnimatePresence mode="wait">
-            <Suspense fallback={<Loader fullPage />}>
+            <Suspense fallback={<Loader />}>
                 <Routes location={location} key={location.pathname}>
                     <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
                     <Route path="/gallery" element={<PageWrapper><Gallery /></PageWrapper>} />

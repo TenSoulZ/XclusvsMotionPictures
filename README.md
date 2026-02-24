@@ -119,7 +119,7 @@ A professional video production portfolio website built with React (frontend) an
 - `/admin` - Admin dashboard (protected)
 - `/login` - Login page
 
-## Architecture
+## Architecture & Deployment
 
 The project follows a decoupled architecture:
 
@@ -162,6 +162,21 @@ Ensure you:
 3. Set up proper CORS origins
 4. Use a production database (PostgreSQL recommended)
 5. Collect static files: `python manage.py collectstatic`
+
+#### Connecting Backend and Frontend on Render
+
+If you are deploying manually (not via Blueprint):
+
+**In Backend Web Service Dashboard:**
+1. Go to **Environment**.
+2. Add `CORS_ALLOWED_ORIGINS` with value `https://your-frontend-url.onrender.com`.
+3. Add `CSRF_TRUSTED_ORIGINS` with value `https://your-frontend-url.onrender.com`.
+4. Add `ALLOWED_HOSTS` with value `your-backend-url.onrender.com`.
+
+**In Frontend Static Site Dashboard:**
+1. Go to **Environment**.
+2. Add `VITE_API_URL` with value `https://your-backend-url.onrender.com/api`.
+3. Trigger a **Clear Cache and Deploy** to ensure the new URL is baked into the build.
 
 ## Security Notes
 
