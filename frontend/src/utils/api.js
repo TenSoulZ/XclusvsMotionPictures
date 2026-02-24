@@ -4,12 +4,19 @@ import axios from 'axios';
  * Axios instance with base configuration.
  * All API requests should use this instance.
  */
+// Ensure the base URL is correctly formatted and doesn't have trailing slashes
+const getBaseURL = () => {
+    const url = import.meta.env.VITE_API_URL || '/api';
+    // Remove any trailing slash to prevent double slashes in requests
+    return url.replace(/\/$/, "");
+};
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || '/api',
+    baseURL: getBaseURL(),
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 30000, // 30 seconds timeout to handle cold starts
+    timeout: 60000, // Increased to 60 seconds to handle Render cold starts
 });
 
 /**
