@@ -19,9 +19,18 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.authtoken.views import obtain_auth_token
+from django.http import HttpResponse
+from django.urls import re_path
+from django.views.static import serve
+
+def home_view(request):
+    return HttpResponse("XMP Backend API is running successfully!", content_type="text/plain")
 
 urlpatterns = [
+    path('', home_view, name='home'),
     path('admin/', admin.site.urls),
     path('api/', include('portfolio.urls')),
     path('api/api-token-auth/', obtain_auth_token, name='api_token_auth'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Force Django to serve media files in production on Render
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

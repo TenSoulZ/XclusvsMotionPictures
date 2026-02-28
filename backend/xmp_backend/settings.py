@@ -30,6 +30,14 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
+# Ensure Render hostnames and wildcards are included
+ALLOWED_HOSTS.extend(['*', '.onrender.com', 'xmp-backend.onrender.com'])
+
+# On Render, the RENDER_EXTERNAL_HOSTNAME is automatically provided
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 
 # Application definition
 
@@ -63,12 +71,22 @@ MIDDLEWARE = [
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    # Strip trailing slashes to satisfy corsheaders.E014
+    # Allow all origins for now to troubleshoot connection issues, 
+    # but still support specific ones from environment variables.
     CORS_ALLOWED_ORIGINS_RAW = config('CORS_ALLOWED_ORIGINS', default='https://xmp-frontend.onrender.com', cast=Csv())
     CORS_ALLOWED_ORIGINS = [origin.rstrip('/') for origin in CORS_ALLOWED_ORIGINS_RAW]
     
+    # If we're on Render, we might want to be more permissive during setup
+    if config('RENDER', default=False, cast=bool):
+        CORS_ALLOW_ALL_ORIGINS = True
+
     CSRF_TRUSTED_ORIGINS_RAW = config('CSRF_TRUSTED_ORIGINS', default='https://xmp-frontend.onrender.com', cast=Csv())
     CSRF_TRUSTED_ORIGINS = [origin.rstrip('/') for origin in CSRF_TRUSTED_ORIGINS_RAW]
+    
+    # Add the current host to trusted origins if on Render
+    RENDER_EXTERNAL_URL = config('RENDER_EXTERNAL_URL', default=None)
+    if RENDER_EXTERNAL_URL:
+        CSRF_TRUSTED_ORIGINS.append(RENDER_EXTERNAL_URL.rstrip('/'))
 
 ROOT_URLCONF = 'xmp_backend.urls'
 
@@ -184,6 +202,8 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
     # Trust Render's load balancer for HTTPS detection
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    USE_X_FORWARDED_HOST = True
+    USE_X_FORWARDED_PORT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
