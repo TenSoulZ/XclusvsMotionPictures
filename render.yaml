@@ -5,7 +5,7 @@ services:
     env: python
     rootDir: backend
     buildCommand: "./build.sh"
-    startCommand: "gunicorn xmp_backend.wsgi:application"
+    startCommand: "gunicorn xmp_backend.wsgi:application --access-logfile - --error-logfile -"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
