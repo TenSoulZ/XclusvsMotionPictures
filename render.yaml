@@ -25,7 +25,7 @@ services:
       - key: IMAGEKIT_PUBLIC_KEY
         sync: false
       - key: IMAGEKIT_URL_ENDPOINT
-        sync: false
+        value: "https://ik.imagekit.io/tensoulz/"
 
   # Frontend: React
   - type: static
