@@ -41,7 +41,9 @@ class ImageKitStorage(Storage):
             
             if response.status_code in [200, 201]:
                 resp_data = response.json()
-                return resp_data['filePath']
+                # Django's validate_file_name will raise SuspiciousFileOperation 
+                # if the returned path starts with a slash, causing a 400 Bad Request.
+                return resp_data['filePath'].lstrip('/')
             else:
                 raise ValidationError(f"ImageKit Upload Failed: {response.status_code} - {response.text}")
         except Exception as e:
