@@ -26,8 +26,21 @@ from django.views.static import serve
 def home_view(request):
     return HttpResponse("XMP Backend API is running successfully!", content_type="text/plain")
 
+def media_debug(request):
+    import os
+    from django.conf import settings
+    media_root = settings.MEDIA_ROOT
+    if not os.path.exists(media_root):
+        return HttpResponse(f"Media root does not exist: {media_root}")
+    files = []
+    for root, dirs, filenames in os.walk(media_root):
+        for filename in filenames:
+            files.append(os.path.relpath(os.path.join(root, filename), media_root))
+    return HttpResponse("\n".join(files) if files else "Media root is empty", content_type="text/plain")
+
 urlpatterns = [
     path('', home_view, name='home'),
+    path('debug-media/', media_debug),
     path('admin/', admin.site.urls),
     path('api/', include('portfolio.urls')),
     path('api/api-token-auth/', obtain_auth_token, name='api_token_auth'),
