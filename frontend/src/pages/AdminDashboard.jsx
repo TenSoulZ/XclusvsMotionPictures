@@ -240,7 +240,7 @@ const AdminDashboard = () => {
 
     const handleEditTrigger = useCallback((item) => {
         setIsEditing(true);
-        setEditId(item.id);
+        setEditId(activeTab === 'blog' ? item.slug : item.id);
         setValidationErrors([]);
         setImagePreview(null);
         
@@ -380,9 +380,11 @@ const AdminDashboard = () => {
         if (!itemToDelete) return;
         
         const id = itemToDelete.id;
-        const endpoint = activeTab === 'messages' ? `/contact/${id}/` :
-                         activeTab === 'pricing' ? `/pricing-plans/${id}/` :
-                         `/${activeTab}/${id}/`;
+        const identifier = activeTab === 'blog' ? itemToDelete.slug : id;
+        
+        const endpoint = activeTab === 'messages' ? `/contact/${identifier}/` :
+                         activeTab === 'pricing' ? `/pricing-plans/${identifier}/` :
+                         `/${activeTab}/${identifier}/`;
 
         // Optimistically remove from UI
         const removeFromState = (setItems) => {
