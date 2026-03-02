@@ -34,7 +34,7 @@ const Layout = ({ children }) => {
                 <ParticlesBackground />
             </Suspense>
             <Navigation />
-            <main id="main-content">
+            <main id="main-content" className="flex-grow-1 d-flex flex-column" style={{ minHeight: '100vh' }}>
                 <BackToTop />
                 {children}
             </main>

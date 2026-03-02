@@ -70,8 +70,10 @@ const Navigation = () => {
                         src={logoWhite} 
                         alt="XMP Logo" 
                         height="40" 
+                        width="114"
                         className="d-inline-block align-top"
                         loading="eager"
+                        style={{ objectFit: 'contain' }}
                     />
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" className="border-0 shadow-none" aria-label="Toggle navigation menu" />
