@@ -6,8 +6,9 @@ import VideoThumbnail from '../components/VideoThumbnail';
 import Loader from '../components/Loader';
 import SEO from '../components/SEO';
 import { getEmbedUrl } from '../utils/videoUtils';
+import { optimizeImage } from '../utils/imageOptimization';
 import { FaStar, FaArrowLeft, FaArrowRight, FaMicrophone, FaBroadcastTower } from 'react-icons/fa';
-import heroBg from '../assets/pictures/hero-bg-pic.jpg';
+import heroBg from '../assets/pictures/hero-bg-pic.webp';
 
 /**
  * Home component - The landing page of Xclusvs Motion Pictures.
@@ -364,7 +365,7 @@ const Home = () => {
                                                     <VideoThumbnail video={featuredWork[0]} className="img-cover w-100 h-100 object-fit-cover" />
                                                 </div>
                                             ) : (
-                                                <img src={featuredWork[0].image} alt={featuredWork[0].title} className="img-cover w-100 h-100 object-fit-cover" loading="lazy" />
+                                                <img src={optimizeImage(featuredWork[0].image, 800)} alt={featuredWork[0].title} className="img-cover w-100 h-100 object-fit-cover" loading="lazy" />
                                             )}
                                             
                                             <div className="position-absolute bottom-0 start-0 w-100 p-5 bg-gradient-to-t" style={{ background: 'linear-gradient(to top, black, transparent)' }}>
@@ -387,7 +388,7 @@ const Home = () => {
                                                 {item.video_url ? (
                                                      <VideoThumbnail video={item} className="img-cover w-100 h-100 object-fit-cover" />
                                                 ) : (
-                                                    <img src={item.image} alt={item.title} className="img-cover w-100 h-100 object-fit-cover" loading="lazy" />
+                                                    <img src={optimizeImage(item.image, 400)} alt={item.title} className="img-cover w-100 h-100 object-fit-cover" loading="lazy" />
                                                 )}
                                                 <div className="position-absolute bottom-0 start-0 w-100 p-4" style={{ background: 'linear-gradient(to top, black, transparent)' }}>
                                                     <h5 className="text-white mb-0">{item.title}</h5>
@@ -437,7 +438,7 @@ const Home = () => {
                                                 className="d-block text-center"
                                             >
                                                 <img 
-                                                    src={brand.logo} 
+                                                    src={optimizeImage(brand.logo, 356, 200)} 
                                                     alt={brand.name} 
                                                     className="brand-logo-img"
                                                     title={brand.name}
@@ -447,7 +448,7 @@ const Home = () => {
                                         ) : (
                                             <div className="d-block text-center" style={{ cursor: 'default' }}>
                                                 <img 
-                                                    src={brand.logo} 
+                                                    src={optimizeImage(brand.logo, 356, 200)} 
                                                     alt={brand.name} 
                                                     className="brand-logo-img"
                                                     title={brand.name}
@@ -497,7 +498,7 @@ const Home = () => {
                                         <div className="d-flex align-items-center gap-3">
                                             {testimonials[currentTesti].client_image ? (
                                                 <img 
-                                                    src={testimonials[currentTesti].client_image} 
+                                                    src={optimizeImage(testimonials[currentTesti].client_image, 120, 120)} 
                                                     className="rounded-circle object-fit-cover shadow-lg" 
                                                     width="60" 
                                                     height="60" 
@@ -596,7 +597,7 @@ const Home = () => {
                                         >
                                             <div style={{ height: '220px', overflow: 'hidden' }}>
                                                 <img 
-                                                    src={post.featured_image} 
+                                                    src={optimizeImage(post.featured_image, 400)} 
                                                     alt={post.title} 
                                                     className="w-100 h-100 object-fit-cover transition-transform"
                                                     loading="lazy"
