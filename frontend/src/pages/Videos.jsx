@@ -12,7 +12,7 @@ import { useToast } from '../contexts/ToastContext';
 import { FaPlay, FaSearch, FaTimes, FaShareAlt } from 'react-icons/fa';
 import '../components/Skeleton.css';
 
-import heroBg from '../assets/pictures/hero-bg-pic.jpg'; // Using the established hero background
+import heroBg from '../assets/pictures/hero-bg-pic.webp'; // Using the established hero background
 
 /**
  * Videos component - Displays a filterable library of video projects.
