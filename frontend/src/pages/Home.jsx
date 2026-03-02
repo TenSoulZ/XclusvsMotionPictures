@@ -8,7 +8,6 @@ import SEO from '../components/SEO';
 import { getEmbedUrl } from '../utils/videoUtils';
 import { optimizeImage } from '../utils/imageOptimization';
 import { FaStar, FaArrowLeft, FaArrowRight, FaMicrophone, FaBroadcastTower } from 'react-icons/fa';
-import heroBg from '../assets/pictures/hero-bg-pic.webp';
 
 /**
  * Home component - The landing page of Xclusvs Motion Pictures.
@@ -165,7 +164,7 @@ const Home = () => {
                     className="position-absolute w-100 h-100"
                 >
                     <img 
-                        src={heroBg}
+                        src="/hero-bg-pic.webp"
                         alt="Cinematic Background"
                         fetchpriority="high"
                         loading="eager"

@@ -12,7 +12,7 @@ import { useToast } from '../contexts/ToastContext';
 import { FaPlay, FaSearch, FaTimes, FaShareAlt } from 'react-icons/fa';
 import '../components/Skeleton.css';
 
-import heroBg from '../assets/pictures/hero-bg-pic.webp'; // Using the established hero background
+import heroBg from '/hero-bg-pic.webp'; // Using the established hero background
 
 /**
  * Videos component - Displays a filterable library of video projects.
@@ -137,11 +137,14 @@ const Videos = () => {
                     style={{ y: y1 }}
                     className="position-absolute w-100 h-100"
                 >
-                    <div 
+                    <img 
+                        src={heroBg}
+                        alt="Cinematic Background"
+                        fetchpriority="high"
+                        loading="eager"
                         style={{ 
-                            backgroundImage: `url(${heroBg})`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
+                            objectFit: 'cover',
+                            objectPosition: 'center',
                             height: '120%', 
                             width: '100%',
                             filter: 'brightness(0.4)'
