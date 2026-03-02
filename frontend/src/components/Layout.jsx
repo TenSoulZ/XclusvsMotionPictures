@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navigation from './Navbar';
 import Footer from './Footer';
-import ParticlesBackground from './ParticlesBackground';
 import BackToTop from './BackToTop';
+
+// Lazy load ParticlesBackground since it's a heavy component and non-critical
+const ParticlesBackground = lazy(() => import('./ParticlesBackground'));
 
 const Layout = ({ children }) => {
     const location = useLocation();
@@ -14,7 +16,9 @@ const Layout = ({ children }) => {
         // Admin Portal Layout
         return (
             <div className="admin-portal-layout d-flex flex-column min-vh-100 position-relative">
-                <ParticlesBackground />
+                <Suspense fallback={null}>
+                    <ParticlesBackground />
+                </Suspense>
                 {/* No Navbar, No Footer, No BackToTop for Admin Portal */}
                 <main className="flex-grow-1">
                     {children}
@@ -26,7 +30,9 @@ const Layout = ({ children }) => {
     // Public Website Layout
     return (
         <div className="d-flex flex-column min-vh-100 position-relative">
-            <ParticlesBackground />
+            <Suspense fallback={null}>
+                <ParticlesBackground />
+            </Suspense>
             <Navigation />
             <main id="main-content">
                 <BackToTop />

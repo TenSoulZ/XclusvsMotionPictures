@@ -163,11 +163,14 @@ const Home = () => {
                     style={{ y: y1 }}
                     className="position-absolute w-100 h-100"
                 >
-                    <div 
+                    <img 
+                        src={heroBg}
+                        alt="Cinematic Background"
+                        fetchpriority="high"
+                        loading="eager"
                         style={{ 
-                            backgroundImage: `url(${heroBg})`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
+                            objectFit: 'cover',
+                            objectPosition: 'center',
                             height: '120%', 
                             width: '100%',
                             filter: 'brightness(0.6)'
@@ -335,7 +338,7 @@ const Home = () => {
             </section>
 
             {/* Featured Work - Dark & Moody */}
-            <section className="py-5 bg-dark">
+            <section className="py-5 bg-dark" style={{ minHeight: '800px' }}>
                 <Container className="py-5">
                     <div className="d-flex justify-content-between align-items-end mb-5">
                         <h2 className="display-4 fw-bold text-white">FEATURED <br/><span className="text-white opacity-25">PROJECTS</span></h2>
@@ -408,8 +411,8 @@ const Home = () => {
             </section>
 
             {/* Clients Section - Premium Marquee */}
-            {brands.length > 0 && (
-                <section className="py-5 bg-black overflow-hidden border-top border-secondary border-opacity-10">
+            <section className="py-5 bg-black overflow-hidden border-top border-secondary border-opacity-10" style={{ minHeight: '300px' }}>
+                {brands.length > 0 ? (
                     <Container fluid className="px-0">
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -457,12 +460,17 @@ const Home = () => {
                             </div>
                         </div>
                     </Container>
-                </section>
-            )}
+                ) : (
+                    <div className="d-flex justify-content-center align-items-center h-100 w-100">
+                        <p className="text-secondary opacity-50">Loading partners...</p>
+                    </div>
+                )}
+            </section>
 
             {/* Testimonials - Premium Carousel */}
-            {testimonials.length > 0 && (
-                <section className="py-5 bg-black position-relative overflow-hidden">
+            <section className="py-5 bg-black position-relative overflow-hidden" style={{ minHeight: '600px' }}>
+                {testimonials.length > 0 ? (
+                    <>
                     {/* Background Subtle Text */}
                     <div className="position-absolute top-50 start-50 translate-middle display-1 fw-bold text-white opacity-25" style={{ fontSize: '15vw', whiteSpace: 'nowrap', zIndex: 0, color: '#1a1a1a', pointerEvents: 'none' }}>
                         FEEDBACK
@@ -552,12 +560,17 @@ const Home = () => {
                             )}
                         </div>
                     </Container>
-                </section>
-            )}
+                    </>
+                ) : (
+                    <div className="d-flex justify-content-center align-items-center h-100 w-100 py-5">
+                        <p className="text-secondary opacity-50">Loading testimonials...</p>
+                    </div>
+                )}
+            </section>
 
             {/* Latest Blog Posts */}
-            {blogPosts.length > 0 && (
-                <section className="py-5 bg-black border-top border-secondary border-opacity-10">
+            <section className="py-5 bg-black border-top border-secondary border-opacity-10" style={{ minHeight: '700px' }}>
+                {blogPosts.length > 0 ? (
                     <Container className="py-5">
                         <div className="d-flex justify-content-between align-items-end mb-5">
                             <div>
@@ -608,8 +621,12 @@ const Home = () => {
                             <Button href="/blog" variant="outline-light" className="w-100 text-decoration-none">VIEW ALL ARTICLES</Button>
                         </div>
                     </Container>
-                </section>
-            )}
+                ) : (
+                    <div className="d-flex justify-content-center align-items-center h-100 w-100 py-5">
+                        <p className="text-secondary opacity-50">Loading journal entries...</p>
+                    </div>
+                )}
+            </section>
 
             <style>{`
                 /* Styles moved to index.css */
