@@ -7,7 +7,7 @@ import Loader from '../components/Loader';
 import SEO from '../components/SEO';
 import { getEmbedUrl } from '../utils/videoUtils';
 import { optimizeImage } from '../utils/imageOptimization';
-import { FaStar, FaArrowLeft, FaArrowRight, FaMicrophone, FaBroadcastTower } from 'react-icons/fa';
+import { FaStar, FaArrowLeft, FaArrowRight, FaMicrophone, FaBroadcastTower, FaVideo } from 'react-icons/fa';
 
 /**
  * Home component - The landing page of Xclusvs Motion Pictures.
@@ -26,6 +26,7 @@ const Home = () => {
     const [loading, setLoading] = React.useState(true);
     const [isLive, setIsLive] = React.useState(false);
     const [activeStream, setActiveStream] = React.useState(null);
+    const [playingVideoId, setPlayingVideoId] = React.useState(null);
 
     React.useEffect(() => {
         /**
@@ -219,7 +220,7 @@ const Home = () => {
                 </motion.div>
             </header>
 
-            {/* Live Screening Section - Appears only when live */}
+            {/* Live Screening CTA - Appears only when live */}
             <AnimatePresence>
                 {isLive && activeStream && (
                     <motion.section 
@@ -228,26 +229,18 @@ const Home = () => {
                         className="py-5 bg-black border-bottom border-danger border-opacity-25"
                     >
                         <Container className="py-4">
-                            <div className="text-center mb-5">
-                                <h6 className="text-danger fw-bold spacing-3 text-uppercase mb-2">Happening Now</h6>
-                                <h2 className="display-4 fw-bold text-white">LIVE <span className="text-white opacity-25">SCREENING</span></h2>
-                            </div>
-                            <div className="glass-card p-2 p-md-4 rounded-4 shadow-lg overflow-hidden border-danger border-opacity-50">
-                                <div className="ratio ratio-16x9">
-                                    <iframe 
-                                        src={getEmbedUrl(activeStream.stream_url) + "?autoplay=1&mute=1"} 
-                                        title={activeStream.title} 
-                                        allowFullScreen
-                                        loading="lazy"
-                                        className="rounded-3 shadow-2xl"
-                                    ></iframe>
-                                </div>
-                                <div className="p-4 d-flex flex-wrap justify-content-between align-items-center gap-3 bg-dark bg-opacity-50">
-                                    <div>
-                                        <h4 className="fw-bold mb-1 text-white">{activeStream.title}</h4>
-                                        <p className="text-light opacity-75 small mb-0">{activeStream.description}</p>
+                            <div className="glass-card p-5 rounded-4 shadow-lg border-danger border-opacity-50 text-center position-relative overflow-hidden">
+                                <div className="position-absolute top-0 start-0 w-100 h-100 bg-danger opacity-10 pulse-bg"></div>
+                                <div className="position-relative z-1">
+                                    <div className="d-inline-flex align-items-center gap-2 bg-danger text-white px-3 py-1 rounded-pill mb-4 shadow-sm">
+                                        <div className="pulse-dot-white"></div>
+                                        <span className="fw-bold small spacing-1">LIVE NOW</span>
                                     </div>
-                                    <Button variant="danger" href="/live" className="px-4 py-2 fw-bold">THE LIVE EXPERIENCE</Button>
+                                    <h2 className="display-4 fw-bold text-white mb-3">{activeStream.title}</h2>
+                                    <p className="text-light opacity-75 fs-5 mb-5 mx-auto" style={{ maxWidth: '600px' }}>{activeStream.description}</p>
+                                    <Button variant="danger" href="/live" size="lg" className="px-5 py-3 fw-bold rounded-pill shadow-lg hover-scale">
+                                        <FaBroadcastTower className="me-2" /> JOIN THE BROADCAST
+                                    </Button>
                                 </div>
                             </div>
                         </Container>
@@ -352,25 +345,46 @@ const Home = () => {
                                 <Col md={8}>
                                     {featuredWork[0] && (
                                         <motion.div 
-                                            whileHover={{ scale: 0.98 }}
+                                            whileHover={!playingVideoId ? { scale: 0.98 } : {}}
                                             className="position-relative overflow-hidden rounded-4 h-100" 
                                             style={{ minHeight: '400px' }}
                                         >
                                             {/* Handle Video vs Photo content */}
                                             {featuredWork[0].video_url ? (
-                                                <div className="w-100 h-100 bg-dark position-relative">
-                                                     {/* Use thumbnail if available, else placeholder or iframe (iframe not ideal for hover card but ok for now) 
-                                                         Ideally we used the thumbnail field from backend */}
-                                                    <VideoThumbnail video={featuredWork[0]} className="img-cover w-100 h-100 object-fit-cover" />
+                                                <div className="w-100 h-100 bg-dark position-relative group">
+                                                    {playingVideoId === featuredWork[0].id ? (
+                                                        <iframe 
+                                                            src={getEmbedUrl(featuredWork[0].video_url) + "?autoplay=1"} 
+                                                            title={featuredWork[0].title}
+                                                            className="w-100 h-100 border-0"
+                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                            allowFullScreen
+                                                        ></iframe>
+                                                    ) : (
+                                                        <>
+                                                            <VideoThumbnail video={featuredWork[0]} className="img-cover w-100 h-100 object-fit-cover" />
+                                                            <div 
+                                                                className="position-absolute top-50 start-50 translate-middle text-white cursor-pointer hover-scale transition-all"
+                                                                onClick={() => setPlayingVideoId(featuredWork[0].id)}
+                                                                style={{ zIndex: 2 }}
+                                                            >
+                                                                <div className="bg-orange bg-opacity-75 rounded-circle p-4 shadow-lg backdrop-blur">
+                                                                    <FaVideo size={40} />
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             ) : (
                                                 <img src={optimizeImage(featuredWork[0].image, 800, 600)} width="800" height="600" alt={featuredWork[0].title} className="img-cover w-100 h-100 object-fit-cover" loading="lazy" />
                                             )}
                                             
-                                            <div className="position-absolute bottom-0 start-0 w-100 p-5 bg-gradient-to-t" style={{ background: 'linear-gradient(to top, black, transparent)' }}>
-                                                <h3 className="text-white mb-0">{featuredWork[0].title}</h3>
-                                                <p className="text-orange small fw-bold spacing-2 text-uppercase">{featuredWork[0].category?.name || 'FEATURED'}</p>
-                                            </div>
+                                            {!playingVideoId && (
+                                                <div className="position-absolute bottom-0 start-0 w-100 p-5 bg-gradient-to-t" style={{ background: 'linear-gradient(to top, black, transparent)' }}>
+                                                    <h3 className="text-white mb-0">{featuredWork[0].title}</h3>
+                                                    <p className="text-orange small fw-bold spacing-2 text-uppercase">{featuredWork[0].category?.name || 'FEATURED'}</p>
+                                                </div>
+                                            )}
                                         </motion.div>
                                     )}
                                 </Col>
@@ -380,19 +394,45 @@ const Home = () => {
                                         {featuredWork.slice(1, 3).map((item) => (
                                             <motion.div 
                                                 key={item.id}
-                                                whileHover={{ scale: 0.98 }}
+                                                whileHover={!playingVideoId ? { scale: 0.98 } : {}}
                                                 className="position-relative overflow-hidden rounded-4 flex-grow-1"
                                                 style={{ minHeight: '250px' }}
                                             >
                                                 {item.video_url ? (
-                                                     <VideoThumbnail video={item} className="img-cover w-100 h-100 object-fit-cover" />
+                                                    <div className="w-100 h-100 bg-dark position-relative">
+                                                        {playingVideoId === item.id ? (
+                                                            <iframe 
+                                                                src={getEmbedUrl(item.video_url) + "?autoplay=1"} 
+                                                                title={item.title}
+                                                                className="w-100 h-100 border-0"
+                                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                                allowFullScreen
+                                                            ></iframe>
+                                                        ) : (
+                                                            <>
+                                                                <VideoThumbnail video={item} className="img-cover w-100 h-100 object-fit-cover" />
+                                                                <div 
+                                                                    className="position-absolute top-50 start-50 translate-middle text-white cursor-pointer hover-scale transition-all"
+                                                                    onClick={() => setPlayingVideoId(item.id)}
+                                                                    style={{ zIndex: 2 }}
+                                                                >
+                                                                    <div className="bg-orange bg-opacity-75 rounded-circle p-3 shadow-lg backdrop-blur">
+                                                                        <FaVideo size={24} />
+                                                                    </div>
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <img src={optimizeImage(item.image, 400, 300)} width="400" height="300" alt={item.title} className="img-cover w-100 h-100 object-fit-cover" loading="lazy" />
                                                 )}
-                                                <div className="position-absolute bottom-0 start-0 w-100 p-4" style={{ background: 'linear-gradient(to top, black, transparent)' }}>
-                                                    <h5 className="text-white mb-0">{item.title}</h5>
-                                                    <p className="text-orange small fw-bold text-uppercase">{item.category?.name || 'PROJECT'}</p>
-                                                </div>
+                                                
+                                                {(!playingVideoId || playingVideoId !== item.id) && (
+                                                    <div className="position-absolute bottom-0 start-0 w-100 p-4" style={{ background: 'linear-gradient(to top, black, transparent)' }}>
+                                                        <h5 className="text-white mb-0">{item.title}</h5>
+                                                        <p className="text-orange small fw-bold text-uppercase">{item.category?.name || 'PROJECT'}</p>
+                                                    </div>
+                                                )}
                                             </motion.div>
                                         ))}
                                     </div>

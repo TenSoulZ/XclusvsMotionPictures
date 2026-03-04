@@ -18,7 +18,8 @@ const DashboardModal = ({
     setImagePreview,
     handleFileChange,
     handleSubmit,
-    formatFileSize
+    formatFileSize,
+    isLoading = false
 }) => {
     const getTitle = () => {
         const type = {
@@ -374,8 +375,10 @@ const DashboardModal = ({
                 </Form>
             </Modal.Body>
             <Modal.Footer className="bg-dark border-secondary">
-                <Button variant="outline-light" onClick={onHide}>Cancel</Button>
-                <Button variant="brand" onClick={handleSubmit}>Save Content</Button>
+                <Button variant="outline-light" onClick={onHide} disabled={isLoading}>Cancel</Button>
+                <Button variant="brand" onClick={handleSubmit} disabled={isLoading}>
+                    {isLoading ? 'Saving...' : 'Save Content'}
+                </Button>
             </Modal.Footer>
         </Modal>
     );

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Container, Row, Col, Button, Badge } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { FaVideo, FaCamera, FaGlobe, FaEdit, FaMicrophone, FaBroadcastTower, FaLightbulb, FaBullhorn } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
@@ -22,6 +23,7 @@ const Services = () => {
         { id: 'marketing', icon: <FaBullhorn size={30}/>, title: 'Digital Marketing', desc: 'Social media management, SEO, and targeted ad campaigns.' },
     ];
 
+    const navigate = useNavigate();
     const [selectedService, setSelectedService] = React.useState('video');
     const [pricingData, setPricingData] = React.useState({});
     const [loading, setLoading] = React.useState(true);
@@ -164,7 +166,12 @@ const Services = () => {
                                         <Button 
                                             variant={tier.popular ? "brand" : "outline-light"} 
                                             className="w-100 py-3 fw-bold rounded-pill mt-auto shadow-hover"
-                                            href="/contact"
+                                            onClick={() => navigate('/contact', { 
+                                                state: { 
+                                                    plan: tier.plan, 
+                                                    service: services.find(s => s.id === selectedService).title 
+                                                } 
+                                            })}
                                         >
                                             {tier.plan === 'Corporate' || tier.plan === 'Enterprise' || tier.plan === 'Dominance' ? 'GET QUOTE' : 'CHOOSE PLAN'}
                                         </Button>

@@ -81,6 +81,8 @@ const AdminDashboard = () => {
     const [newsletterSubject, setNewsletterSubject] = useState('');
     const [newsletterContent, setNewsletterContent] = useState('');
     const [isBroadcasting, setIsBroadcasting] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Reset page and scroll to top when tab changes
     useEffect(() => {
@@ -379,6 +381,7 @@ const AdminDashboard = () => {
     const handleConfirmDelete = async () => {
         if (!itemToDelete) return;
         
+        setIsDeleting(true);
         const id = itemToDelete.id;
         const identifier = activeTab === 'blog' ? itemToDelete.slug : id;
         
@@ -386,36 +389,34 @@ const AdminDashboard = () => {
                          activeTab === 'pricing' ? `/pricing-plans/${identifier}/` :
                          `/${activeTab}/${identifier}/`;
 
-        // Optimistically remove from UI
-        const removeFromState = (setItems) => {
-            setItems(prev => prev.filter(item => item.id !== id));
-        };
-
-        if (activeTab === 'videos') removeFromState(setVideos);
-        else if (activeTab === 'photos') removeFromState(setPhotos);
-        else if (activeTab === 'brands') removeFromState(setBrands);
-        else if (activeTab === 'messages') removeFromState(setMessages);
-        else if (activeTab === 'testimonials') removeFromState(setTestimonials);
-        else if (activeTab === 'blog') removeFromState(setBlogPosts);
-        else if (activeTab === 'live') removeFromState(setLiveStreams);
-        else if (activeTab === 'team') removeFromState(setTeam);
-        else if (activeTab === 'pricing') removeFromState(setPricingPlans);
-        else if (activeTab === 'newsletter') removeFromState(setSubscribers);
-        
-        // Adjust total count
-        setTotalCount(prev => Math.max(0, prev - 1));
-
-        setShowDeleteModal(false); // Close modal immediately
-
         try {
             await api.delete(endpoint);
+            
+            // Update UI after successful deletion
+            const removeFromState = (setItems) => {
+                setItems(prev => prev.filter(item => item.id !== id));
+            };
+
+            if (activeTab === 'videos') removeFromState(setVideos);
+            else if (activeTab === 'photos') removeFromState(setPhotos);
+            else if (activeTab === 'brands') removeFromState(setBrands);
+            else if (activeTab === 'messages') removeFromState(setMessages);
+            else if (activeTab === 'testimonials') removeFromState(setTestimonials);
+            else if (activeTab === 'blog') removeFromState(setBlogPosts);
+            else if (activeTab === 'live') removeFromState(setLiveStreams);
+            else if (activeTab === 'team') removeFromState(setTeam);
+            else if (activeTab === 'pricing') removeFromState(setPricingPlans);
+            else if (activeTab === 'newsletter') removeFromState(setSubscribers);
+            
+            setTotalCount(prev => Math.max(0, prev - 1));
             setItemToDelete(null);
+            setShowDeleteModal(false);
             toast.success('Item deleted successfully!');
         } catch (error) {
-            // Revert by re-fetching (simpler than storing deleted item to re-insert)
             console.error("Error deleting item:", error);
-            toast.error('Failed to delete item. Reloading...');
-            fetchContent(); 
+            toast.error('Failed to delete item. Please try again.');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -438,6 +439,7 @@ const AdminDashboard = () => {
             }
         }
 
+        setIsSaving(true);
         const endpoint = activeTab === 'pricing' ? '/pricing-plans/' :
                          activeTab === 'messages' ? '/contact/' :
                          `/${activeTab}/`;
@@ -451,6 +453,7 @@ const AdminDashboard = () => {
 
             if (!categoryId) {
                 toast.error('Invalid category selected.');
+                setIsSaving(false);
                 return;
             }
         }
@@ -541,6 +544,8 @@ const AdminDashboard = () => {
             console.error("Error saving content:", error);
             const errorMsg = error.response?.data ? JSON.stringify(error.response.data) : "Check console for details.";
             toast.error(`Failed to save: ${errorMsg}`);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -843,17 +848,19 @@ const AdminDashboard = () => {
                 handleFileChange={handleFileChange}
                 handleSubmit={handleSubmit}
                 formatFileSize={formatFileSize}
+                isLoading={isSaving}
             />
 
             {/* Delete Confirmation Modal */}
             <Modal 
                 show={showDeleteModal} 
-                onHide={() => setShowDeleteModal(false)} 
+                onHide={() => !isDeleting && setShowDeleteModal(false)} 
                 centered 
                 size="sm"
                 contentClassName="xmp-modal"
+                backdrop={isDeleting ? 'static' : true}
             >
-                <Modal.Header closeButton className="border-0 pb-0">
+                <Modal.Header closeButton={!isDeleting} className="border-0 pb-0">
                     <Modal.Title className="fs-6 opacity-50 text-uppercase spacing-2">Confirm Action</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="text-center py-4 px-4">
@@ -867,11 +874,11 @@ const AdminDashboard = () => {
                     </p>
                 </Modal.Body>
                 <Modal.Footer className="border-0 px-4 pb-4 pt-0 gap-2">
-                    <Button variant="outline-light" className="flex-grow-1 rounded-pill" onClick={() => setShowDeleteModal(false)}>
+                    <Button variant="outline-light" className="flex-grow-1 rounded-pill" onClick={() => setShowDeleteModal(false)} disabled={isDeleting}>
                         CANCEL
                     </Button>
-                    <Button variant="brand" className="flex-grow-1 rounded-pill" onClick={handleConfirmDelete}>
-                        DELETE
+                    <Button variant="brand" className="flex-grow-1 rounded-pill" onClick={handleConfirmDelete} disabled={isDeleting}>
+                        {isDeleting ? 'DELETING...' : 'DELETE'}
                     </Button>
                 </Modal.Footer>
             </Modal>
@@ -904,81 +911,83 @@ const AdminDashboard = () => {
                 </Modal.Footer>
             </Modal>
 
-            {/* View Message Modal */}
+            {/* View Message Modal - Chat Style */}
             <Modal 
                 show={showViewMessageModal} 
                 onHide={() => setShowViewMessageModal(false)} 
                 centered 
+                size="lg"
                 contentClassName="xmp-modal"
             >
-                <Modal.Header closeButton className="border-0 pb-0">
-                    <Modal.Title className="fs-6 opacity-50 text-uppercase spacing-2">Message Inquiry</Modal.Title>
+                <Modal.Header closeButton className="border-0 pb-0 pt-4 px-4">
+                    <Modal.Title className="d-flex align-items-center gap-3">
+                         <div className="bg-orange text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5" style={{ width: '48px', height: '48px' }}>
+                            {selectedMessage?.name?.charAt(0) || 'U'}
+                         </div>
+                         <div>
+                             <h5 className="fw-bold text-white mb-0">{selectedMessage?.name}</h5>
+                             <p className="text-secondary small mb-0">{selectedMessage?.email}</p>
+                         </div>
+                    </Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="py-4 px-4">
-                    <div className="mb-4">
-                        <label className="text-orange small fw-bold text-uppercase d-block mb-1">From</label>
-                        <h4 className="fw-bold mb-0 text-white">{selectedMessage?.name}</h4>
-                        <p className="text-secondary small">{selectedMessage?.email}</p>
-                    </div>
-                    
-                    <div className="mb-4">
-                        <label className="text-orange small fw-bold text-uppercase d-block mb-1">Subject</label>
-                        <h5 className="fw-bold text-white">{selectedMessage?.subject}</h5>
-                    </div>
-
-                    <div className="bg-black bg-opacity-50 p-4 rounded-3 border border-secondary border-opacity-25 mb-4">
-                        <label className="text-orange small fw-bold text-uppercase d-block mb-2">Message Content</label>
-                        <p className="text-white-50 mb-0" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
-                            {selectedMessage?.message}
-                        </p>
-                    </div>
-                    
-                    {selectedMessage?.response_content && (
-                        <div className="bg-success bg-opacity-10 p-4 rounded-3 border border-success border-opacity-25 mb-4">
-                            <div className="d-flex justify-content-between align-items-center mb-2">
-                                <label className="text-success small fw-bold text-uppercase d-block mb-0">Your Response</label>
-                                <small className="text-success opacity-75">{new Date(selectedMessage.responded_at).toLocaleString()}</small>
+                    <div className="chat-container d-flex flex-column gap-4 mb-4">
+                         {/* Visitor Message Bubble */}
+                         <div className="d-flex flex-column align-items-start" style={{ maxWidth: '85%' }}>
+                            <small className="text-secondary ms-2 mb-1">{new Date(selectedMessage?.created_at).toLocaleString()}</small>
+                            <div className="bg-dark bg-opacity-50 p-4 rounded-4 rounded-top-left-0 border border-secondary border-opacity-25 shadow-sm">
+                                <h6 className="text-orange fw-bold mb-2">{selectedMessage?.subject}</h6>
+                                <p className="text-white-50 mb-0" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                                    {selectedMessage?.message}
+                                </p>
                             </div>
-                            <p className="text-white mb-0" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
-                                {selectedMessage.response_content}
-                            </p>
-                        </div>
-                    )}
+                         </div>
 
+                         {/* Admin Response Bubble */}
+                         {selectedMessage?.response_content && (
+                            <div className="d-flex flex-column align-items-end align-self-end" style={{ maxWidth: '85%' }}>
+                                <small className="text-secondary me-2 mb-1">You • {new Date(selectedMessage.responded_at).toLocaleString()}</small>
+                                <div className="bg-orange bg-opacity-10 p-4 rounded-4 rounded-top-right-0 border border-orange border-opacity-25 shadow-sm text-end">
+                                    <p className="text-white mb-0" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                                        {selectedMessage.response_content}
+                                    </p>
+                                </div>
+                            </div>
+                         )}
+                    </div>
+
+                    {/* Reply Input Area */}
                     {!selectedMessage?.response_content && (
-                        <div className="mt-4">
+                        <div className="mt-5 border-top border-secondary border-opacity-25 pt-4">
                             <Form.Group>
-                                <Form.Label className="text-orange small fw-bold text-uppercase">Reply to {selectedMessage?.name}</Form.Label>
-                                <Form.Control 
-                                    as="textarea" 
-                                    rows={4} 
-                                    className="bg-dark border-secondary text-white p-3"
-                                    placeholder="Type your response here..."
-                                    value={responseContent}
-                                    onChange={(e) => setResponseContent(e.target.value)}
-                                    disabled={isResponding}
-                                />
+                                <Form.Label className="text-white small fw-bold text-uppercase spacing-1 mb-2">Write a Reply</Form.Label>
+                                <div className="position-relative">
+                                    <Form.Control 
+                                        as="textarea" 
+                                        rows={4} 
+                                        className="bg-black border-secondary text-white p-3 rounded-3 pe-5"
+                                        placeholder="Type your response here..."
+                                        value={responseContent}
+                                        onChange={(e) => setResponseContent(e.target.value)}
+                                        disabled={isResponding}
+                                        style={{ resize: 'none' }}
+                                    />
+                                    <div className="position-absolute bottom-0 end-0 p-2">
+                                         <Button 
+                                            variant="brand" 
+                                            className="rounded-circle p-3 d-flex align-items-center justify-content-center shadow-lg"
+                                            onClick={handleSendResponse}
+                                            disabled={isResponding || !responseContent.trim()}
+                                            title="Send Reply"
+                                        >
+                                            <FaEnvelope size={18} />
+                                        </Button>
+                                    </div>
+                                </div>
                             </Form.Group>
-                            <Button 
-                                variant="brand" 
-                                className="mt-3 w-100 rounded-pill py-2"
-                                onClick={handleSendResponse}
-                                disabled={isResponding || !responseContent.trim()}
-                            >
-                                {isResponding ? 'SENDING...' : 'SEND REPLY'}
-                            </Button>
                         </div>
                     )}
-                    
-                    <div className="mt-4 text-end">
-                        <small className="text-secondary">Received on {selectedMessage && new Date(selectedMessage.created_at).toLocaleString()}</small>
-                    </div>
                 </Modal.Body>
-                <Modal.Footer className="border-0 px-4 pb-4 pt-0">
-                    <Button variant="outline-light" className="w-100 rounded-pill py-2" onClick={() => setShowViewMessageModal(false)}>
-                        CLOSE
-                    </Button>
-                </Modal.Footer>
             </Modal>
 
             {/* Newsletter Broadcast Modal */}
