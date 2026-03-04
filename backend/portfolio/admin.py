@@ -1,6 +1,4 @@
 from django.contrib import admin
-
-from django.contrib import admin
 from .models import (
     Category, Video, Photo, ContactMessage, 
     NewsletterSubscriber, Brand, Testimonial, 
@@ -70,5 +68,3 @@ class PricingPlanAdmin(admin.ModelAdmin):
     list_display = ('plan_name', 'service_type', 'price', 'is_popular', 'order')
     list_filter = ('service_type', 'is_popular')
     search_fields = ('plan_name', 'features')
-
-# Register your models here.

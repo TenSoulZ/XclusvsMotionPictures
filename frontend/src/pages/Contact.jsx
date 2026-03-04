@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { useLocation } from 'react-router-dom';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaYoutube, FaFacebook } from 'react-icons/fa';
 import api from '../utils/api';
 import SEO from '../components/SEO';
@@ -8,6 +9,7 @@ import SEO from '../components/SEO';
  * Contact component - Provides a contact form and company location information.
  */
 const Contact = () => {
+    const location = useLocation();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -16,6 +18,16 @@ const Contact = () => {
     });
     const [status, setStatus] = useState({ type: '', msg: '' });
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (location.state?.plan && location.state?.service) {
+            setFormData(prev => ({
+                ...prev,
+                subject: `${location.state.service} Inquiry`,
+                message: `I am interested in the ${location.state.plan} plan for ${location.state.service}. Please send me more details.`
+            }));
+        }
+    }, [location.state]);
 
     const validateForm = () => {
         if (!formData.name.trim()) return "Please enter your name.";
@@ -163,6 +175,9 @@ const Contact = () => {
                                                 <option value="Branding & Design">Branding & Design</option>
                                                 <option value="Live Streaming Event">Live Streaming Event</option>
                                                 <option value="General Question">General Question</option>
+                                                {formData.subject && !["Video Production Inquiry", "Photography Session", "Web Development Project", "Branding & Design", "Live Streaming Event", "General Question", "Other"].includes(formData.subject) && (
+                                                    <option value={formData.subject}>{formData.subject}</option>
+                                                )}
                                                 <option value="Other">Other</option>
                                             </Form.Select>
                                         </Form.Group>
