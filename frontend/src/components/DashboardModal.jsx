@@ -1,6 +1,8 @@
 import React from 'react';
 import { Modal, Button, Form, Row, Col, Alert } from 'react-bootstrap';
 import { FaTimesCircle } from 'react-icons/fa';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 /**
  * DashboardModal component for adding or editing content in the Admin Dashboard.
@@ -119,17 +121,33 @@ const DashboardModal = ({
                             {activeTab !== 'brands' && activeTab !== 'live' && activeTab !== 'pricing' && (
                                 <Form.Group className="mb-3">
                                     <Form.Label>{activeTab === 'testimonials' ? 'Feedback Content' : activeTab === 'blog' ? 'Article Content' : 'Description'}</Form.Label>
-                                    <Form.Control 
-                                        as="textarea" 
-                                        rows={activeTab === 'testimonials' || activeTab === 'blog' ? 12 : 2} 
-                                        className="bg-black border-secondary text-white"
-                                        value={newItem.description} 
-                                        onChange={e => setNewItem({...newItem, description: e.target.value})} 
-                                    />
-                                    {activeTab === 'blog' && (
-                                        <Form.Text className="text-secondary opacity-50 small">
-                                            Use double enters for new paragraphs. Preview to see how it looks.
-                                        </Form.Text>
+                                    
+                                    {activeTab === 'blog' ? (
+                                        <div className="bg-white text-dark rounded">
+                                            <ReactQuill 
+                                                theme="snow"
+                                                value={newItem.description}
+                                                onChange={(content) => setNewItem({ ...newItem, description: content })}
+                                                style={{ height: '300px', marginBottom: '50px' }}
+                                                modules={{
+                                                    toolbar: [
+                                                        [{ 'header': [1, 2, false] }],
+                                                        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                                                        [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+                                                        ['link', 'image'],
+                                                        ['clean']
+                                                    ],
+                                                }}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <Form.Control 
+                                            as="textarea" 
+                                            rows={activeTab === 'testimonials' ? 6 : 2} 
+                                            className="bg-black border-secondary text-white"
+                                            value={newItem.description} 
+                                            onChange={e => setNewItem({...newItem, description: e.target.value})} 
+                                        />
                                     )}
                                 </Form.Group>
                             )}

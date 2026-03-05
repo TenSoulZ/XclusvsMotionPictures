@@ -8,8 +8,14 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from django.core.cache import cache
 from .models import Category, Video, Photo, ContactMessage, Brand, Testimonial, BlogPost, LiveStream, TeamMember, PricingPlan, NewsletterSubscriber, Equipment
 from .serializers import CategorySerializer, VideoSerializer, PhotoSerializer, ContactMessageSerializer, BrandSerializer, TestimonialSerializer, BlogPostSerializer, LiveStreamSerializer, TeamMemberSerializer, PricingPlanSerializer, NewsletterSubscriberSerializer, EquipmentSerializer
 from .permissions import IsAdminOrReadOnly, AllowAnyCreateOrIsAuthenticated, AllowAnyCreateOrIsAdmin
@@ -25,6 +31,8 @@ class ContactMessageViewSet(viewsets.ModelViewSet):
     queryset = ContactMessage.objects.all().order_by('-created_at')
     serializer_class = ContactMessageSerializer
     permission_classes = [AllowAnyCreateOrIsAdmin]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'contact'
     
     def perform_create(self, serializer):
         """
@@ -63,6 +71,8 @@ class NewsletterSubscriberViewSet(viewsets.ModelViewSet):
     queryset = NewsletterSubscriber.objects.all().order_by('-created_at')
     serializer_class = NewsletterSubscriberSerializer
     permission_classes = [AllowAnyCreateOrIsAdmin]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'newsletter'
 
     @action(detail=False, methods=['post'], permission_classes=[IsAdminUser])
     def broadcast(self, request):
@@ -76,20 +86,33 @@ class NewsletterSubscriberViewSet(viewsets.ModelViewSet):
             return Response({"error": "Subject and content are required."}, status=status.HTTP_400_BAD_REQUEST)
         
         subscribers = NewsletterSubscriber.objects.filter(is_active=True)
-        recipient_list = [sub.email for sub in subscribers]
         
-        if not recipient_list:
+        if not subscribers.exists():
             return Response({"status": "No active subscribers to send to."})
 
         from .utils import broadcast_newsletter
         try:
-            if broadcast_newsletter(subject, content, recipient_list):
-                return Response({"status": f"Successfully sent newsletter to {len(recipient_list)} subscribers."})
+            # Pass full subscriber objects to utils to handle unsubscribe tokens
+            if broadcast_newsletter(subject, content, subscribers):
+                return Response({"status": f"Successfully sent newsletter to {subscribers.count()} subscribers."})
             else:
                 raise Exception("Newsletter broadcast failed for an unknown reason")
         except Exception as e:
             logger.error(f"Failed to broadcast newsletter: {e}")
             return Response({"error": "Failed to send newsletter."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny], url_path='unsubscribe/(?P<token>[^/.]+)')
+    def unsubscribe(self, request, token=None):
+        """
+        Unsubscribe endpoint using a secure token.
+        """
+        try:
+            subscriber = NewsletterSubscriber.objects.get(unsubscribe_token=token)
+            subscriber.is_active = False
+            subscriber.save()
+            return Response({"status": "Successfully unsubscribed from the newsletter."})
+        except NewsletterSubscriber.DoesNotExist:
+            return Response({"error": "Invalid unsubscribe token."}, status=status.HTTP_400_BAD_REQUEST)
 
 class TeamMemberViewSet(viewsets.ModelViewSet):
     """
@@ -109,6 +132,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     pagination_class = None
     permission_classes = [IsAdminOrReadOnly]
+
+    @method_decorator(cache_page(60 * 60 * 2))  # Cache for 2 hours
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 class VideoViewSet(viewsets.ModelViewSet):
     """
@@ -147,6 +174,10 @@ class BrandViewSet(viewsets.ModelViewSet):
     pagination_class = None
     permission_classes = [IsAdminOrReadOnly]
 
+    @method_decorator(cache_page(60 * 60 * 2))  # Cache for 2 hours
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 class TestimonialViewSet(viewsets.ModelViewSet):
     """
     ViewSet for client testimonials.
@@ -155,6 +186,10 @@ class TestimonialViewSet(viewsets.ModelViewSet):
     serializer_class = TestimonialSerializer
     pagination_class = None
     permission_classes = [IsAdminOrReadOnly]
+
+    @method_decorator(cache_page(60 * 60 * 2))  # Cache for 2 hours
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 class BlogPostViewSet(viewsets.ModelViewSet):
     """
@@ -223,3 +258,17 @@ class CurrentUserView(views.APIView):
             'is_staff': request.user.is_staff,
             'is_superuser': request.user.is_superuser
         })
+
+# Cache Invalidation Signals
+@receiver([post_save, post_delete], sender=Category)
+@receiver([post_save, post_delete], sender=Brand)
+@receiver([post_save, post_delete], sender=Testimonial)
+def invalidate_cache(sender, **kwargs):
+    """
+    Invalidates the list cache when relevant models are updated.
+    """
+    # Note: We use a simple approach of clearing the entire cache or specific keys.
+    # Since we use cache_page, keys are constructed by DRF/Django.
+    # For a simple locmem setup, clearing all is often acceptable for small sites.
+    cache.clear()
+    logger.info(f"Cache invalidated due to change in {sender.__name__}")

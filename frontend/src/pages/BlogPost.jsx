@@ -163,13 +163,8 @@ const BlogPost = () => {
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.4 }}
                             className="blog-content text-white fs-5 lh-lg"
-                        >
-                            {post.content.split('\n').map((paragraph, idx) => (
-                                <p key={idx} className={paragraph.trim() === '' ? 'mb-4' : 'mb-3'}>
-                                    {paragraph}
-                                </p>
-                            ))}
-                        </motion.article>
+                            dangerouslySetInnerHTML={{ __html: post.content }}
+                        />
 
                         <div className="d-flex justify-content-between align-items-center mt-5">
                             <Button 

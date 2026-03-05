@@ -23,17 +23,41 @@ const pages = [
 
 const BASE_URL = 'https://xclusvsmotionpictures.com';
 
-const generateSitemap = () => {
+const generateSitemap = async () => {
+    let blogPages = [];
 
-    // TODO: Fetch dynamic routes like blog posts from the API
-    // For now, we'll just use the static pages
+    try {
+        // Fetch published blog posts from local or remote API
+        // For build time, we assume the backend is running or we have access to the DB.
+        // If not, we might need a different strategy.
+        // Here we attempt a fetch if the API is reachable.
+        
+        const response = await fetch(`${BASE_URL.replace('xmp-frontend', 'xmp-backend')}/api/blog/`);
+        if (response.ok) {
+            const data = await response.json();
+            const posts = data.results || data;
+            
+            blogPages = posts.map(post => ({
+                url: `/blog/${post.slug}`,
+                changefreq: 'monthly',
+                priority: 0.6,
+                lastmod: post.updated_at || new Date().toISOString()
+            }));
+            
+            console.log(`Found ${blogPages.length} blog posts for sitemap.`);
+        }
+    } catch (error) {
+        console.warn("Could not fetch dynamic blog routes for sitemap generation. Using static pages only.", error);
+    }
+
+    const allPages = [...pages, ...blogPages];
     
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-            ${pages.map(page => `
+            ${allPages.map(page => `
                 <url>
                     <loc>${BASE_URL}${page.url}</loc>
-                    <lastmod>${new Date().toISOString()}</lastmod>
+                    <lastmod>${page.lastmod || new Date().toISOString()}</lastmod>
                     <changefreq>${page.changefreq}</changefreq>
                     <priority>${page.priority}</priority>
                 </url>

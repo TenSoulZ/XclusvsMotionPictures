@@ -54,26 +54,43 @@ def send_admin_response(instance, response_content):
         print(f"Error processing admin response: {e}")
         return False
 
-def broadcast_newsletter_async(subject, content, from_email, bcc_list):
-    try:
-        email = EmailMessage(
-            subject=subject,
-            body=content,
-            from_email=from_email,
-            bcc=bcc_list,
-        )
-        email.send(fail_silently=False)
-    except Exception as e:
-        print(f"Error broadcasting async newsletter: {e}")
+def broadcast_newsletter_async(subject, content, from_email, subscribers):
+    # If using BCC, we can't include individual unsubscribe links.
+    # For a proper newsletter, we should send individual emails or use an ESP.
+    # Here, we will iterate and send individual emails to support unsubscribe links.
+    # Note: For very large lists, this should be moved to a task queue like Celery.
+    
+    frontend_url = settings.CORS_ALLOWED_ORIGINS[0] if settings.CORS_ALLOWED_ORIGINS else 'http://localhost:5173'
+    
+    for sub in subscribers:
+        try:
+            unsubscribe_link = f"{frontend_url}/unsubscribe?token={sub.unsubscribe_token}"
+            email_body = f"{content}\n\n---\nTo unsubscribe, click here: {unsubscribe_link}"
+            
+            send_mail(
+                subject,
+                email_body,
+                from_email,
+                [sub.email],
+                fail_silently=True
+            )
+        except Exception as e:
+            print(f"Error sending newsletter to {sub.email}: {e}")
 
-def broadcast_newsletter(subject, content, recipient_list):
+def broadcast_newsletter(subject, content, subscribers):
     """
-    Broadcasts a newsletter to a list of subscribers using BCC for privacy.
+    Broadcasts a newsletter to a list of subscribers.
     """
     try:
+        # Convert QuerySet to list of objects to pass to thread if needed, 
+        # but better to pass IDs and re-fetch if using Celery. 
+        # For threads, passing objects is okay but be careful with DB connections.
+        # Here we'll evaluate the queryset to a list to avoid thread safety issues with DB cursors.
+        subscriber_list = list(subscribers)
+        
         thread = threading.Thread(
             target=broadcast_newsletter_async,
-            args=(subject, content, settings.DEFAULT_FROM_EMAIL, recipient_list)
+            args=(subject, content, settings.DEFAULT_FROM_EMAIL, subscriber_list)
         )
         thread.start()
         return True

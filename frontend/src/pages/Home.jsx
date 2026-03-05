@@ -658,7 +658,7 @@ const Home = () => {
                                                 </p>
                                                 <h4 className="text-white fw-bold mb-3 line-clamp-2">{post.title}</h4>
                                                 <p className="text-white-50 small line-clamp-3 mb-4">
-                                                    {post.content.substring(0, 120)}...
+                                                    {post.content.replace(/<[^>]*>?/gm, '').substring(0, 120)}...
                                                 </p>
                                                 <div className="text-orange small fw-bold spacing-1">READ MORE →</div>
                                             </div>
