@@ -8,6 +8,7 @@ import Loader from '../components/Loader';
 import Skeleton from '../components/Skeleton';
 import { FaCalendarAlt, FaUser, FaArrowLeft, FaShareAlt } from 'react-icons/fa';
 import { useToast } from '../contexts/ToastContext';
+import DOMPurify from 'dompurify';
 
 /**
  * BlogPost component - Displays the full content of a single blog article.
@@ -163,7 +164,7 @@ const BlogPost = () => {
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.4 }}
                             className="blog-content text-white fs-5 lh-lg"
-                            dangerouslySetInnerHTML={{ __html: post.content }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
                         />
 
                         <div className="d-flex justify-content-between align-items-center mt-5">
