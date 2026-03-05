@@ -64,7 +64,7 @@ const Equipment = () => {
             
             {/* Hero / Intro Section */}
             <section className="py-5 mb-5 position-relative">
-                <div className="position-absolute top-0 start-0 w-100 h-100 bg-orange opacity-5 blur-bg" style={{ filter: 'blur(100px)', zIndex: -1 }}></div>
+                <div className="position-absolute top-0 start-0 w-100 h-100 bg-orange blur-bg" style={{ filter: 'blur(100px)', zIndex: -1, opacity: 0.05 }}></div>
                 <Container className="text-center position-relative z-1">
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
