@@ -174,6 +174,24 @@ const DashboardRow = memo(({
                     <td className="bg-transparent align-middle">{item.role}</td>
                 </>
             )}
+
+            {/* Equipment */}
+            {activeTab === 'equipment' && (
+                <>
+                    <td className="bg-transparent align-middle">
+                        <div style={{ width: '50px', height: '50px', overflow: 'hidden', borderRadius: '8px', background: '#333' }}>
+                            {item.image ? (
+                                <img src={item.image} alt={item.name} className="w-100 h-100 object-fit-cover" loading="lazy" />
+                            ) : (
+                                <div className="w-100 h-100 d-flex align-items-center justify-content-center text-secondary small">Img</div>
+                            )}
+                        </div>
+                    </td>
+                    <td className="bg-transparent align-middle fw-bold">{item.name}</td>
+                    <td className="bg-transparent align-middle"><Badge bg="dark" className="border border-secondary text-secondary fw-normal">{item.category}</Badge></td>
+                    <td className="bg-transparent align-middle text-secondary small text-truncate" style={{maxWidth: '200px'}}>{item.description}</td>
+                </>
+            )}
             
             {/* Pricing */}
             {activeTab === 'pricing' && (
@@ -288,6 +306,13 @@ const DashboardTable = memo(({
                                 <th className="bg-transparent text-secondary">Image</th>
                                 <th className="bg-transparent text-secondary">Name</th>
                                 <th className="bg-transparent text-secondary">Role</th>
+                            </>
+                        ) : activeTab === 'equipment' ? (
+                            <>
+                                <th className="bg-transparent text-secondary">Preview</th>
+                                <th className="bg-transparent text-secondary">Name</th>
+                                <th className="bg-transparent text-secondary">Category</th>
+                                <th className="bg-transparent text-secondary">Description</th>
                             </>
                         ) : activeTab === 'testimonials' ? (
                             <>

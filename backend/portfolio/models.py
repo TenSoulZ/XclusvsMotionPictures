@@ -178,6 +178,31 @@ class TeamMember(models.Model):
 
     def __str__(self):
         return self.name
+
+class Equipment(models.Model):
+    """
+    Model representing equipment owned by the company.
+    """
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='equipment/', null=True, blank=True)
+    category = models.CharField(max_length=50, choices=[
+        ('Camera', 'Camera'),
+        ('Lens', 'Lens'),
+        ('Lighting', 'Lighting'),
+        ('Audio', 'Audio'),
+        ('Drone', 'Drone'),
+        ('Stabilizer', 'Stabilizer'),
+        ('Accessory', 'Accessory')
+    ], default='Camera')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['category', 'name']
+
+    def __str__(self):
+        return self.name
+
 class PricingPlan(models.Model):
     """
     Model for managing service pricing plans dynamically.

@@ -335,7 +335,10 @@ const Home = () => {
                 <Container className="py-5">
                     <div className="d-flex justify-content-between align-items-end mb-5">
                         <h2 className="display-4 fw-bold text-white">FEATURED <br/><span className="text-white opacity-25">PROJECTS</span></h2>
-                        <Button variant="outline-light" href="/gallery" className="d-none d-md-block">VIEW ALL WORK</Button>
+                        <div className="d-none d-md-flex gap-3">
+                            <Button variant="outline-light" href="/videos">VIEW VIDEOS</Button>
+                            <Button variant="outline-light" href="/gallery">VIEW GALLERY</Button>
+                        </div>
                     </div>
                     
                     <Row className="g-4">
@@ -444,8 +447,9 @@ const Home = () => {
                              </Col>
                         )}
                     </Row>
-                    <div className="d-md-none text-center mt-4">
-                        <Button variant="outline-light" href="/gallery">VIEW ALL WORK</Button>
+                    <div className="d-md-none text-center mt-4 d-flex flex-column gap-2">
+                        <Button variant="outline-light" href="/videos" className="w-100">VIEW VIDEOS</Button>
+                        <Button variant="outline-light" href="/gallery" className="w-100">VIEW GALLERY</Button>
                     </div>
                 </Container>
             </section>

@@ -3,7 +3,7 @@ import { Container, Button, Modal, Nav, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
-import { FaPlus, FaTimesCircle, FaBroadcastTower, FaEye, FaVideo, FaImage, FaStar, FaPenNib, FaEnvelope, FaMoneyBillAlt, FaTrash, FaSignOutAlt, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaPlus, FaTimesCircle, FaBroadcastTower, FaEye, FaVideo, FaImage, FaStar, FaPenNib, FaEnvelope, FaMoneyBillAlt, FaTrash, FaSignOutAlt, FaExternalLinkAlt, FaTools } from 'react-icons/fa';
 import { useToast } from '../contexts/ToastContext';
 import { validateImage, formatFileSize, createImagePreview } from '../utils/imageValidation';
 import { getEmbedUrl } from '../utils/videoUtils';
@@ -14,7 +14,7 @@ import DashboardModal from '../components/DashboardModal';
 
 /**
  * AdminDashboard component - Core interface for content management.
- * Provides CRUD operations for videos, photos, brands, testimonials, blog posts, live streams, and team members.
+ * Provides CRUD operations for videos, photos, brands, testimonials, blog posts, live streams, equipment, and team members.
  */
 
 const AdminDashboard = () => {
@@ -29,6 +29,7 @@ const AdminDashboard = () => {
     const [testimonials, setTestimonials] = useState([]);
     const [blogPosts, setBlogPosts] = useState([]);
     const [liveStreams, setLiveStreams] = useState([]);
+    const [equipment, setEquipment] = useState([]);
     const [team, setTeam] = useState([]);
     const [pricingPlans, setPricingPlans] = useState([]);
     const [subscribers, setSubscribers] = useState([]);
@@ -120,6 +121,7 @@ const AdminDashboard = () => {
                            activeTab === 'contact' || activeTab === 'messages' ? '/contact/' :
                            activeTab === 'newsletter' ? '/newsletter/' :
                            activeTab === 'pricing' ? '/pricing-plans/' :
+                           activeTab === 'equipment' ? '/equipment/' :
                            `/${activeTab}/`;
 
             const params = {
@@ -138,6 +140,7 @@ const AdminDashboard = () => {
             else if (activeTab === 'testimonials') setTestimonials(data);
             else if (activeTab === 'blog') setBlogPosts(data);
             else if (activeTab === 'live') setLiveStreams(data);
+            else if (activeTab === 'equipment') setEquipment(data);
             else if (activeTab === 'team') setTeam(data);
             else if (activeTab === 'pricing') setPricingPlans(data);
             else if (activeTab === 'newsletter') setSubscribers(data);
@@ -201,7 +204,7 @@ const AdminDashboard = () => {
             description: '', 
             url: '', 
             image: null, 
-            category: categories.length > 0 ? categories[0].name.toLowerCase() : 'wedding', 
+            category: activeTab === 'equipment' ? 'Camera' : (categories.length > 0 ? categories[0].name.toLowerCase() : 'wedding'), 
             is_featured: false, 
             website_url: '',
             client_name: '',
@@ -222,7 +225,7 @@ const AdminDashboard = () => {
         setImagePreview(null);
         setValidationErrors([]);
         setShowModal(true);
-    }, [categories]);
+    }, [categories, activeTab]);
 
     const handleViewMessage = useCallback(async (message) => {
         setSelectedMessage(message);
@@ -298,6 +301,9 @@ const AdminDashboard = () => {
             baseItem.scheduled_at = item.scheduled_at?.slice(0, 16) || '';
         } else if (activeTab === 'team') {
             baseItem.role = item.role;
+            setImagePreview(item.image);
+        } else if (activeTab === 'equipment') {
+            baseItem.category = item.category;
             setImagePreview(item.image);
         } else if (activeTab === 'pricing') {
             baseItem.plan_name = item.plan_name;
@@ -387,6 +393,7 @@ const AdminDashboard = () => {
         
         const endpoint = activeTab === 'messages' ? `/contact/${identifier}/` :
                          activeTab === 'pricing' ? `/pricing-plans/${identifier}/` :
+                         activeTab === 'equipment' ? `/equipment/${identifier}/` :
                          `/${activeTab}/${identifier}/`;
 
         try {
@@ -404,6 +411,7 @@ const AdminDashboard = () => {
             else if (activeTab === 'testimonials') removeFromState(setTestimonials);
             else if (activeTab === 'blog') removeFromState(setBlogPosts);
             else if (activeTab === 'live') removeFromState(setLiveStreams);
+            else if (activeTab === 'equipment') removeFromState(setEquipment);
             else if (activeTab === 'team') removeFromState(setTeam);
             else if (activeTab === 'pricing') removeFromState(setPricingPlans);
             else if (activeTab === 'newsletter') removeFromState(setSubscribers);
@@ -442,6 +450,7 @@ const AdminDashboard = () => {
         setIsSaving(true);
         const endpoint = activeTab === 'pricing' ? '/pricing-plans/' :
                          activeTab === 'messages' ? '/contact/' :
+                         activeTab === 'equipment' ? '/equipment/' :
                          `/${activeTab}/`;
 
         // Find category ID for videos/photos
@@ -489,6 +498,11 @@ const AdminDashboard = () => {
                 } else if (activeTab === 'team') {
                     payload.append('name', newItem.title);
                     payload.append('role', newItem.role);
+                    if (newItem.image) payload.append('image', newItem.image);
+                } else if (activeTab === 'equipment') {
+                    payload.append('name', newItem.title);
+                    payload.append('description', newItem.description);
+                    payload.append('category', newItem.category);
                     if (newItem.image) payload.append('image', newItem.image);
                 }
             } else {
@@ -577,6 +591,7 @@ const AdminDashboard = () => {
         { id: 'testimonials', label: 'Testimonials', icon: <FaStar /> },
         { id: 'blog', label: 'Blog', icon: <FaPenNib /> },
         { id: 'live', label: 'Live', icon: <FaBroadcastTower /> },
+        { id: 'equipment', label: 'Equipment', icon: <FaTools /> },
         { id: 'team', label: 'Team', icon: <FaStar /> },
         { id: 'pricing', label: 'Pricing', icon: <FaMoneyBillAlt /> },
         { id: 'newsletter', label: 'Newsletter', icon: <FaEnvelope /> },
@@ -608,6 +623,7 @@ const AdminDashboard = () => {
             'testimonials': testimonials,
             'blog': blogPosts,
             'live': liveStreams,
+            'equipment': equipment,
             'team': team,
             'pricing': pricingPlans,
             'newsletter': subscribers
@@ -624,7 +640,7 @@ const AdminDashboard = () => {
             (item.subject?.toLowerCase().includes(term)) ||
             (item.message?.toLowerCase().includes(term))
         );
-    }, [activeTab, videos, photos, brands, messages, testimonials, blogPosts, liveStreams, team, pricingPlans, subscribers, searchTerm]);
+    }, [activeTab, videos, photos, brands, messages, testimonials, blogPosts, liveStreams, equipment, team, pricingPlans, subscribers, searchTerm]);
 
     const renderDashboardOverview = () => {
         // Calculate unread count safely
@@ -774,7 +790,7 @@ const AdminDashboard = () => {
                                 </div>
                                 {activeTab !== 'messages' && activeTab !== 'newsletter' && (
                                     <Button variant="brand" className="px-4 py-2" onClick={handleAddTrigger}>
-                                        <FaPlus className="me-2" /> Add {activeTab === 'videos' ? 'Video' : activeTab === 'photos' ? 'Photo' : activeTab === 'brands' ? 'Brand' : activeTab === 'testimonials' ? 'Testimonial' : activeTab === 'blog' ? 'Blog Post' : activeTab === 'team' ? 'Team Member' : activeTab === 'pricing' ? 'Pricing Plan' : 'Live Stream'}
+                                        <FaPlus className="me-2" /> Add {activeTab === 'videos' ? 'Video' : activeTab === 'photos' ? 'Photo' : activeTab === 'brands' ? 'Brand' : activeTab === 'testimonials' ? 'Testimonial' : activeTab === 'blog' ? 'Blog Post' : activeTab === 'team' ? 'Team Member' : activeTab === 'pricing' ? 'Pricing Plan' : activeTab === 'equipment' ? 'Equipment' : 'Live Stream'}
                                     </Button>
                                 )}
                                 {activeTab === 'newsletter' && (

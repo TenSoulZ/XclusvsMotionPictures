@@ -13,7 +13,7 @@ def seed():
     print("Seeding data...")
 
     # Categories
-    categories = ['Wedding', 'Corporate', 'Event', 'Music Video', 'Documentary']
+    categories = ['Wedding', 'Corporate', 'Event', 'Music Video', 'Documentary', 'Fashion']
     cat_objs = []
     for name in categories:
         slug = name.lower().replace(' ', '-')

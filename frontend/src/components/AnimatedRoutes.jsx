@@ -17,6 +17,7 @@ const Blog = lazy(() => import('../pages/Blog'));
 const BlogPost = lazy(() => import('../pages/BlogPost'));
 const Login = lazy(() => import('../pages/Login'));
 const Live = lazy(() => import('../pages/Live'));
+const Equipment = lazy(() => import('../pages/Equipment'));
 const FAQ = lazy(() => import('../pages/FAQ'));
 const Disclaimer = lazy(() => import('../pages/Disclaimer'));
 const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
@@ -58,6 +59,7 @@ const AnimatedRoutes = () => {
                     <Route path="/blog" element={<PageWrapper><Blog /></PageWrapper>} />
                     <Route path="/blog/:slug" element={<PageWrapper><BlogPost /></PageWrapper>} />
                     <Route path="/live" element={<PageWrapper><Live /></PageWrapper>} />
+                    <Route path="/equipment" element={<PageWrapper><Equipment /></PageWrapper>} />
                     <Route path="/faq" element={<PageWrapper><FAQ /></PageWrapper>} />
                     <Route path="/disclaimer" element={<PageWrapper><Disclaimer /></PageWrapper>} />
                     <Route path="/privacy-policy" element={<PageWrapper><PrivacyPolicy /></PageWrapper>} />
