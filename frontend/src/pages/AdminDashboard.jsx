@@ -3,7 +3,7 @@ import { Container, Button, Modal, Nav, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
-import { FaPlus, FaTimesCircle, FaBroadcastTower, FaEye, FaVideo, FaImage, FaStar, FaPenNib, FaEnvelope, FaMoneyBillAlt, FaTrash, FaSignOutAlt, FaExternalLinkAlt, FaTools } from 'react-icons/fa';
+import { FaPlus, FaTimesCircle, FaBroadcastTower, FaEye, FaVideo, FaImage, FaStar, FaPenNib, FaEnvelope, FaMoneyBillAlt, FaTrash, FaSignOutAlt, FaExternalLinkAlt, FaTools, FaWhatsapp } from 'react-icons/fa';
 import { useToast } from '../contexts/ToastContext';
 import { validateImage, formatFileSize, createImagePreview } from '../utils/imageValidation';
 import { getEmbedUrl } from '../utils/videoUtils';
@@ -942,7 +942,15 @@ const AdminDashboard = () => {
                          </div>
                          <div>
                              <h5 className="fw-bold text-white mb-0">{selectedMessage?.name}</h5>
-                             <p className="text-secondary small mb-0">{selectedMessage?.email}</p>
+                             <div className="d-flex align-items-center gap-2">
+                                <p className="text-secondary small mb-0">{selectedMessage?.email}</p>
+                                {selectedMessage?.phone_number && (
+                                    <>
+                                        <span className="text-secondary small">•</span>
+                                        <p className="text-secondary small mb-0">{selectedMessage?.phone_number}</p>
+                                    </>
+                                )}
+                             </div>
                          </div>
                     </Modal.Title>
                 </Modal.Header>
@@ -988,13 +996,24 @@ const AdminDashboard = () => {
                                         disabled={isResponding}
                                         style={{ resize: 'none' }}
                                     />
-                                    <div className="position-absolute bottom-0 end-0 p-2">
+                                    <div className="position-absolute bottom-0 end-0 p-2 d-flex gap-2">
+                                         {selectedMessage?.phone_number && (
+                                            <a 
+                                                href={`https://wa.me/${selectedMessage.phone_number.replace(/\D/g, '')}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="btn btn-success rounded-circle p-3 d-flex align-items-center justify-content-center shadow-lg text-white"
+                                                title="Reply via WhatsApp"
+                                            >
+                                                <FaWhatsapp size={18} />
+                                            </a>
+                                         )}
                                          <Button 
                                             variant="brand" 
                                             className="rounded-circle p-3 d-flex align-items-center justify-content-center shadow-lg"
                                             onClick={handleSendResponse}
                                             disabled={isResponding || !responseContent.trim()}
-                                            title="Send Reply"
+                                            title="Send Reply via Email"
                                         >
                                             <FaEnvelope size={18} />
                                         </Button>
