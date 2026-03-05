@@ -11,11 +11,25 @@ const DashboardRow = memo(({
     onToggleFeatured, 
     onToggleLive, 
     onPreview, 
-    onEdit 
+    onEdit,
+    selectedItems = [],
+    onSelectItem
 }) => {
     return (
-        <tr>
-            <td className="bg-transparent align-middle text-secondary">{item.id}</td>
+        <tr className={selectedItems.includes(item.id) ? 'bg-orange bg-opacity-10' : ''}>
+            <td className="bg-transparent align-middle text-secondary">
+                <div className="d-flex align-items-center gap-2">
+                    {['videos', 'photos', 'blog'].includes(activeTab) && (
+                        <Form.Check 
+                            type="checkbox"
+                            className="m-0"
+                            checked={selectedItems.includes(item.id)}
+                            onChange={() => onSelectItem(item.id)}
+                        />
+                    )}
+                    {item.id}
+                </div>
+            </td>
             
             {/* Videos and Photos */}
             {(activeTab === 'videos' || activeTab === 'photos') && (
@@ -273,7 +287,9 @@ const DashboardTable = memo(({
     onToggleFeatured, 
     onToggleLive, 
     onPreview, 
-    onEdit 
+    onEdit,
+    selectedItems = [],
+    onSelectItem
 }) => {
     if (!data || data.length === 0) {
         return (
@@ -373,6 +389,8 @@ const DashboardTable = memo(({
                             onToggleLive={onToggleLive}
                             onPreview={onPreview}
                             onEdit={onEdit}
+                            selectedItems={selectedItems}
+                            onSelectItem={onSelectItem}
                         />
                     ))}
                 </tbody>

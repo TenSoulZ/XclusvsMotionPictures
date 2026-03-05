@@ -3,9 +3,11 @@ import { Container, Button, Modal, Nav, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
-import { FaPlus, FaTimesCircle, FaBroadcastTower, FaEye, FaVideo, FaImage, FaStar, FaPenNib, FaEnvelope, FaMoneyBillAlt, FaTrash, FaSignOutAlt, FaExternalLinkAlt, FaTools, FaWhatsapp } from 'react-icons/fa';
+import { FaPlus, FaTimesCircle, FaBroadcastTower, FaEye, FaVideo, FaImage, FaStar, FaPenNib, FaEnvelope, FaMoneyBillAlt, FaTrash, FaSignOutAlt, FaExternalLinkAlt, FaTools, FaWhatsapp, FaCheckSquare, FaSquare } from 'react-icons/fa';
 import { useToast } from '../contexts/ToastContext';
 import { validateImage, formatFileSize, createImagePreview } from '../utils/imageValidation';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'; // Add css for editor
 import { getEmbedUrl } from '../utils/videoUtils';
 import Pagination from '../components/Pagination';
 import logoOrange from '../assets/logos/xmp-logo-orange.png';
@@ -77,6 +79,11 @@ const AdminDashboard = () => {
     const [responseContent, setResponseContent] = useState('');
     const [isResponding, setIsResponding] = useState(false);
 
+    // Bulk Actions State
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+    const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+
     // Newsletter State
     const [showNewsletterModal, setShowNewsletterModal] = useState(false);
     const [newsletterSubject, setNewsletterSubject] = useState('');
@@ -88,6 +95,7 @@ const AdminDashboard = () => {
     // Reset page and scroll to top when tab changes
     useEffect(() => {
         setCurrentPage(1);
+        setSelectedItems([]); // Reset selection on tab change
         // Scroll the container into view
         if (dashboardTopRef.current) {
             dashboardTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -381,6 +389,65 @@ const AdminDashboard = () => {
         localStorage.removeItem('token');
         toast.info('Logged out successfully.');
         navigate('/login');
+    };
+
+    // Bulk Delete Logic
+    const toggleSelectItem = (id) => {
+        setSelectedItems(prev => 
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedItems.length === filteredData.length) {
+            setSelectedItems([]);
+        } else {
+            setSelectedItems(filteredData.map(item => item.id));
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedItems.length === 0) return;
+        
+        setIsBulkDeleting(true);
+        let successCount = 0;
+        let failCount = 0;
+
+        // Note: For a real production app, implement a bulk delete endpoint.
+        // Here we iterate, which is fine for small batches.
+        for (const id of selectedItems) {
+            try {
+                // Determine identifier (slug vs id)
+                let identifier = id;
+                if (activeTab === 'blog') {
+                    const post = blogPosts.find(p => p.id === id);
+                    if (post) identifier = post.slug;
+                }
+
+                const endpoint = activeTab === 'messages' ? `/contact/${identifier}/` :
+                                 activeTab === 'pricing' ? `/pricing-plans/${identifier}/` :
+                                 activeTab === 'equipment' ? `/equipment/${identifier}/` :
+                                 `/${activeTab}/${identifier}/`;
+                
+                await api.delete(endpoint);
+                successCount++;
+            } catch (error) {
+                console.error(`Failed to delete item ${id}:`, error);
+                failCount++;
+            }
+        }
+
+        // Refresh Data
+        fetchContent();
+        setSelectedItems([]);
+        setShowBulkDeleteModal(false);
+        setIsBulkDeleting(false);
+
+        if (failCount === 0) {
+            toast.success(`Successfully deleted ${successCount} items.`);
+        } else {
+            toast.warning(`Deleted ${successCount} items, but failed to delete ${failCount} items.`);
+        }
     };
 
     // Confirm Delete Action (Optimistic Update)
@@ -812,6 +879,35 @@ const AdminDashboard = () => {
                         </>
                     ) : (
                         <>
+                            <div className="mb-3 d-flex justify-content-between align-items-center">
+                                {['videos', 'photos', 'blog'].includes(activeTab) && filteredData.length > 0 && (
+                                    <div className="d-flex align-items-center gap-3">
+                                        <div className="form-check">
+                                            <input 
+                                                className="form-check-input bg-dark border-secondary" 
+                                                type="checkbox" 
+                                                checked={selectedItems.length === filteredData.length && filteredData.length > 0}
+                                                onChange={toggleSelectAll}
+                                                id="selectAll"
+                                            />
+                                            <label className="form-check-label text-secondary small" htmlFor="selectAll">
+                                                Select All
+                                            </label>
+                                        </div>
+                                        {selectedItems.length > 0 && (
+                                            <Button 
+                                                variant="outline-danger" 
+                                                size="sm" 
+                                                className="d-flex align-items-center gap-2"
+                                                onClick={() => setShowBulkDeleteModal(true)}
+                                            >
+                                                <FaTrash /> Delete ({selectedItems.length})
+                                            </Button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
                             <DashboardTable 
                                 activeTab={activeTab}
                                 data={filteredData}
@@ -819,8 +915,41 @@ const AdminDashboard = () => {
                                 onToggleFeatured={handleToggleFeatured}
                                 onToggleLive={handleToggleLive}
                                 onPreview={(stream) => { setPreviewStream(stream); setShowPreviewModal(true); }}
-                                onEdit={handleEditTrigger}
-                            />
+                                    onEdit={handleEditTrigger}
+                                    selectedItems={selectedItems}
+                                    onSelectItem={toggleSelectItem}
+                                />
+                                {activeTab === 'dashboard' && (
+                                    <div className="mt-5 glass-card p-4">
+                                        <h4 className="fw-bold mb-4">Quick <span className="text-orange">Stats</span></h4>
+                                        <Row className="g-3">
+                                            <Col md={3}>
+                                                <div className="p-3 bg-dark rounded-3 text-center border border-secondary border-opacity-10">
+                                                    <p className="text-secondary small mb-1">Subscribers</p>
+                                                    <h3 className="fw-bold text-white mb-0">{subscribers.length}</h3>
+                                                </div>
+                                            </Col>
+                                            <Col md={3}>
+                                                <div className="p-3 bg-dark rounded-3 text-center border border-secondary border-opacity-10">
+                                                    <p className="text-secondary small mb-1">Equipment</p>
+                                                    <h3 className="fw-bold text-white mb-0">{equipment.length}</h3>
+                                                </div>
+                                            </Col>
+                                            <Col md={3}>
+                                                <div className="p-3 bg-dark rounded-3 text-center border border-secondary border-opacity-10">
+                                                    <p className="text-secondary small mb-1">Brands</p>
+                                                    <h3 className="fw-bold text-white mb-0">{brands.length}</h3>
+                                                </div>
+                                            </Col>
+                                            <Col md={3}>
+                                                <div className="p-3 bg-dark rounded-3 text-center border border-secondary border-opacity-10">
+                                                    <p className="text-secondary small mb-1">Live Streams</p>
+                                                    <h3 className="fw-bold text-white mb-0">{liveStreams.length}</h3>
+                                                </div>
+                                            </Col>
+                                        </Row>
+                                    </div>
+                                )}
 
                             <Pagination 
                                 currentPage={currentPage}
@@ -866,6 +995,38 @@ const AdminDashboard = () => {
                 formatFileSize={formatFileSize}
                 isLoading={isSaving}
             />
+
+            {/* Bulk Delete Confirmation Modal */}
+            <Modal 
+                show={showBulkDeleteModal} 
+                onHide={() => !isBulkDeleting && setShowBulkDeleteModal(false)} 
+                centered 
+                size="sm"
+                contentClassName="xmp-modal"
+                backdrop={isBulkDeleting ? 'static' : true}
+            >
+                <Modal.Header closeButton={!isBulkDeleting} className="border-0 pb-0">
+                    <Modal.Title className="fs-6 opacity-50 text-uppercase spacing-2">Confirm Bulk Action</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="text-center py-4 px-4">
+                    <div className="text-danger mb-4" style={{ fontSize: '3.5rem', filter: 'drop-shadow(0 0 15px rgba(220,53,69,0.4))' }}>
+                        <FaTrash />
+                    </div>
+                    <h4 className="fw-bold mb-3">Delete {selectedItems.length} Items?</h4>
+                    <p className="text-secondary small mb-0 px-2">
+                        You are about to remove <span className="text-white fw-bold">{selectedItems.length} items</span>. 
+                        This action is irreversible.
+                    </p>
+                </Modal.Body>
+                <Modal.Footer className="border-0 px-4 pb-4 pt-0 gap-2">
+                    <Button variant="outline-light" className="flex-grow-1 rounded-pill" onClick={() => setShowBulkDeleteModal(false)} disabled={isBulkDeleting}>
+                        CANCEL
+                    </Button>
+                    <Button variant="danger" className="flex-grow-1 rounded-pill" onClick={handleBulkDelete} disabled={isBulkDeleting}>
+                        {isBulkDeleting ? 'DELETING...' : 'DELETE ALL'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
             {/* Delete Confirmation Modal */}
             <Modal 
