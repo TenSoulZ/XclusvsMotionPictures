@@ -3,7 +3,7 @@ Serializers for the XMP Portfolio backend.
 Converts model instances to JSON for the API.
 """
 from rest_framework import serializers
-from .models import Category, Video, Photo, ContactMessage, Brand, Testimonial, BlogPost, LiveStream, TeamMember, PricingPlan, NewsletterSubscriber
+from .models import Category, Video, Photo, ContactMessage, Brand, Testimonial, BlogPost, LiveStream, TeamMember, PricingPlan, NewsletterSubscriber, Equipment
 
 class NewsletterSubscriberSerializer(serializers.ModelSerializer):
     """Serializer for the NewsletterSubscriber model."""
@@ -75,6 +75,12 @@ class LiveStreamSerializer(serializers.ModelSerializer):
     """Serializer for the LiveStream model."""
     class Meta:
         model = LiveStream
+        fields = '__all__'
+
+class EquipmentSerializer(serializers.ModelSerializer):
+    """Serializer for the Equipment model."""
+    class Meta:
+        model = Equipment
         fields = '__all__'
 
 class PricingPlanSerializer(serializers.ModelSerializer):

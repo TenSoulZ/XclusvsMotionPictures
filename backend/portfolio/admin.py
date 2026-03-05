@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import (
     Category, Video, Photo, ContactMessage, 
     NewsletterSubscriber, Brand, Testimonial, 
-    BlogPost, LiveStream, TeamMember, PricingPlan
+    BlogPost, LiveStream, TeamMember, PricingPlan,
+    Equipment
 )
 
 @admin.register(Category)
@@ -68,3 +69,9 @@ class PricingPlanAdmin(admin.ModelAdmin):
     list_display = ('plan_name', 'service_type', 'price', 'is_popular', 'order')
     list_filter = ('service_type', 'is_popular')
     search_fields = ('plan_name', 'features')
+
+@admin.register(Equipment)
+class EquipmentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'created_at')
+    list_filter = ('category',)
+    search_fields = ('name', 'description')

@@ -10,8 +10,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Category, Video, Photo, ContactMessage, Brand, Testimonial, BlogPost, LiveStream, TeamMember, PricingPlan, NewsletterSubscriber
-from .serializers import CategorySerializer, VideoSerializer, PhotoSerializer, ContactMessageSerializer, BrandSerializer, TestimonialSerializer, BlogPostSerializer, LiveStreamSerializer, TeamMemberSerializer, PricingPlanSerializer, NewsletterSubscriberSerializer
+from .models import Category, Video, Photo, ContactMessage, Brand, Testimonial, BlogPost, LiveStream, TeamMember, PricingPlan, NewsletterSubscriber, Equipment
+from .serializers import CategorySerializer, VideoSerializer, PhotoSerializer, ContactMessageSerializer, BrandSerializer, TestimonialSerializer, BlogPostSerializer, LiveStreamSerializer, TeamMemberSerializer, PricingPlanSerializer, NewsletterSubscriberSerializer, EquipmentSerializer
 from .permissions import IsAdminOrReadOnly, AllowAnyCreateOrIsAuthenticated, AllowAnyCreateOrIsAdmin
 
 logger = logging.getLogger(__name__)
@@ -184,6 +184,18 @@ class LiveStreamViewSet(viewsets.ModelViewSet):
     queryset = LiveStream.objects.all().order_by('-created_at')
     serializer_class = LiveStreamSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+class EquipmentViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing equipment.
+    """
+    queryset = Equipment.objects.all().order_by('category', 'name')
+    serializer_class = EquipmentSerializer
+    pagination_class = None
+    permission_classes = [IsAdminOrReadOnly]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['category']
+    search_fields = ['name', 'description']
 
 class PricingPlanViewSet(viewsets.ModelViewSet):
     """

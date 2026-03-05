@@ -30,6 +30,7 @@ const DashboardModal = ({
             'blog': 'Blog Post',
             'team': 'Team Member',
             'live': 'Live Stream',
+            'equipment': 'Equipment',
             'pricing': 'Pricing Plan'
         }[activeTab] || 'Item';
         return `${isEditing ? 'Edit' : 'Add New'} ${type}`;
@@ -68,7 +69,7 @@ const DashboardModal = ({
                             <Row>
                                 <Col md={activeTab === 'brands' || activeTab === 'testimonials' || activeTab === 'blog' || activeTab === 'live' || activeTab === 'pricing' ? 12 : 8}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>{activeTab === 'brands' ? 'Brand Name' : activeTab === 'testimonials' ? 'Client Name' : activeTab === 'pricing' ? 'Plan Name' : 'Title'}</Form.Label>
+                                        <Form.Label>{activeTab === 'brands' ? 'Brand Name' : activeTab === 'testimonials' ? 'Client Name' : activeTab === 'pricing' ? 'Plan Name' : activeTab === 'equipment' ? 'Equipment Name' : 'Title'}</Form.Label>
                                         <Form.Control 
                                             type="text" 
                                             className="bg-black border-secondary text-white" 
@@ -90,12 +91,24 @@ const DashboardModal = ({
                                                 value={newItem.category} 
                                                 onChange={e => setNewItem({...newItem, category: e.target.value})}
                                             >
-                                                {categories.length > 0 ? (
-                                                    categories.map(cat => (
-                                                        <option key={cat.id} value={cat.name}>{cat.name}</option>
-                                                    ))
+                                                {activeTab === 'equipment' ? (
+                                                    <>
+                                                        <option value="Camera">Camera</option>
+                                                        <option value="Lens">Lens</option>
+                                                        <option value="Lighting">Lighting</option>
+                                                        <option value="Audio">Audio</option>
+                                                        <option value="Drone">Drone</option>
+                                                        <option value="Stabilizer">Stabilizer</option>
+                                                        <option value="Accessory">Accessory</option>
+                                                    </>
                                                 ) : (
-                                                    <option>Loading categories...</option>
+                                                    categories.length > 0 ? (
+                                                        categories.map(cat => (
+                                                            <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                                        ))
+                                                    ) : (
+                                                        <option>Loading categories...</option>
+                                                    )
                                                 )}
                                             </Form.Select>
                                         </Form.Group>
@@ -278,13 +291,14 @@ const DashboardModal = ({
                         </>
                     )}
 
-                    {(activeTab === 'photos' || activeTab === 'brands' || activeTab === 'testimonials' || activeTab === 'blog' || activeTab === 'team') && (
+                    {(activeTab === 'photos' || activeTab === 'brands' || activeTab === 'testimonials' || activeTab === 'blog' || activeTab === 'team' || activeTab === 'equipment') && (
                          <Form.Group className="mb-3">
                             <Form.Label>
                                 {activeTab === 'brands' ? 'Upload Logo' : 
                                  activeTab === 'testimonials' ? 'Client Image (Optional)' : 
                                  activeTab === 'team' ? 'Profile Picture' : 
                                  activeTab === 'blog' ? 'Featured Image' : 
+                                 activeTab === 'equipment' ? 'Equipment Image' :
                                  'Upload Image'}
                             </Form.Label>
                             <Form.Control 
@@ -328,7 +342,7 @@ const DashboardModal = ({
                         </Form.Group>
                     )}
 
-                    {activeTab !== 'brands' && activeTab !== 'testimonials' && activeTab !== 'blog' && activeTab !== 'live' && (
+                    {activeTab !== 'brands' && activeTab !== 'testimonials' && activeTab !== 'blog' && activeTab !== 'live' && activeTab !== 'equipment' && (
                         <Form.Check 
                             type="switch"
                             label="Mark as Featured"
