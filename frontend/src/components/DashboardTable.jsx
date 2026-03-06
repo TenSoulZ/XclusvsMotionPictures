@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Table, Button, Badge } from 'react-bootstrap';
+import { Table, Button, Badge, Form } from 'react-bootstrap';
 import { FaTrash, FaStar, FaPlay, FaStop, FaEye, FaEdit } from 'react-icons/fa';
 import VideoThumbnail from './VideoThumbnail';
 
