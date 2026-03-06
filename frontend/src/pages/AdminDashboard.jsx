@@ -6,8 +6,8 @@ import api from '../utils/api';
 import { FaPlus, FaTimesCircle, FaBroadcastTower, FaEye, FaVideo, FaImage, FaStar, FaPenNib, FaEnvelope, FaMoneyBillAlt, FaTrash, FaSignOutAlt, FaExternalLinkAlt, FaTools, FaWhatsapp, FaCheckSquare, FaSquare } from 'react-icons/fa';
 import { useToast } from '../contexts/ToastContext';
 import { validateImage, formatFileSize, createImagePreview } from '../utils/imageValidation';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css'; // Add css for editor
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css'; // Add css for editor
 import { getEmbedUrl } from '../utils/videoUtils';
 import Pagination from '../components/Pagination';
 import logoOrange from '../assets/logos/xmp-logo-orange.png';

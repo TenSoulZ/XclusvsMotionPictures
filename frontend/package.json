@@ -21,7 +21,7 @@
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.0.0",
     "react-helmet-async": "^2.0.5",
-    "react-quill": "^2.0.0",
+    "react-quill-new": "^3.3.3",
     "dompurify": "^3.2.4"
   },
   "devDependencies": {
@@ -42,7 +42,7 @@
       "react": "$react",
       "react-dom": "$react-dom"
     },
-    "react-quill": {
+    "react-quill-new": {
       "react": "$react",
       "react-dom": "$react-dom"
     }
