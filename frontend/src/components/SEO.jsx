@@ -6,7 +6,7 @@ const SEO = ({ title, description, keywords, image, url, schemaData }) => {
     const fullTitle = title ? `${title} | ${siteTitle}` : siteTitle;
     const defaultDescription = "Professional cinematography and photography services in Harare, Zimbabwe. Capturing your best moments with cinematic excellence.";
     const metaDescription = description || defaultDescription;
-    const siteUrl = "https://xclusvsmotionpictures.com"; // Replace with actual URL
+    const siteUrl = "https://www.xmp.co.zw";
     const canonicalUrl = url ? `${siteUrl}${url}` : siteUrl;
 
     return (

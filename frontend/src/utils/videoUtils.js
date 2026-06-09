@@ -48,6 +48,14 @@ export const getEmbedUrl = (url) => {
         embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false`;
     }
 
+    // Vimeo URL conversion
+    else if (url.includes('vimeo.com/')) {
+        const vimeoId = url.split('vimeo.com/')[1]?.split('/')[0]?.split('?')[0];
+        if (vimeoId) {
+            embedUrl = `https://player.vimeo.com/video/${vimeoId}`;
+        }
+    }
+
     // Twitch URL conversion
     else if (url.includes('twitch.tv')) {
         const channel = url.split('twitch.tv/')[1]?.split('/')[0]?.split('?')[0];

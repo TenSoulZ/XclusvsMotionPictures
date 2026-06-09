@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getVideoId, getVideoThumbnail } from '../utils/videoUtils';
 
 const VideoThumbnail = ({ video, className, style }) => {
     const [thumb, setThumb] = useState('https://placehold.co/800x450?text=Video');
@@ -16,17 +17,9 @@ const VideoThumbnail = ({ video, className, style }) => {
             if (!url) return;
 
             // 2. YouTube (Sync)
-            let videoId = '';
-            if (url.includes('youtube.com/watch?v=')) {
-                videoId = url.split('v=')[1].split('&')[0];
-            } else if (url.includes('youtu.be/')) {
-                videoId = url.split('youtu.be/')[1].split('?')[0];
-            } else if (url.includes('youtube.com/embed/')) {
-                 videoId = url.split('embed/')[1].split('?')[0];
-            }
-
-            if (videoId) {
-                setThumb(`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`);
+            const videoId = getVideoId(url);
+            if (videoId && (url.includes('youtube') || url.includes('youtu.be'))) {
+                setThumb(getVideoThumbnail(url));
                 return;
             }
 

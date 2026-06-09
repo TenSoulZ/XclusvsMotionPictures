@@ -60,7 +60,8 @@ def broadcast_newsletter_async(subject, content, from_email, subscribers):
     # Here, we will iterate and send individual emails to support unsubscribe links.
     # Note: For very large lists, this should be moved to a task queue like Celery.
     
-    frontend_url = settings.CORS_ALLOWED_ORIGINS[0] if settings.CORS_ALLOWED_ORIGINS else 'http://localhost:5173'
+    cors_origins = getattr(settings, 'CORS_ALLOWED_ORIGINS', [])
+    frontend_url = cors_origins[0] if cors_origins else 'http://localhost:5173'
     
     for sub in subscribers:
         try:

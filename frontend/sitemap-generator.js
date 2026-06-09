@@ -21,7 +21,7 @@ const pages = [
     { url: '/terms-and-conditions', changefreq: 'yearly', priority: 0.3 },
 ];
 
-const BASE_URL = 'https://xclusvsmotionpictures.com';
+const BASE_URL = 'https://www.xmp.co.zw';
 
 const generateSitemap = async () => {
     let blogPages = [];
@@ -32,7 +32,8 @@ const generateSitemap = async () => {
         // If not, we might need a different strategy.
         // Here we attempt a fetch if the API is reachable.
         
-        const response = await fetch(`${BASE_URL.replace('xmp-frontend', 'xmp-backend')}/api/blog/`);
+        const backendUrl = process.env.VITE_API_URL || 'http://localhost:8000/api';
+        const response = await fetch(`${backendUrl.replace(/\/$/, '')}/blog/`);
         if (response.ok) {
             const data = await response.json();
             const posts = data.results || data;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Container, Button, Row, Col } from 'react-bootstrap';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
@@ -637,10 +638,9 @@ const Home = () => {
                                         transition={{ delay: idx * 0.1 }}
                                         viewport={{ once: true }}
                                     >
-                                        <div 
-                                            className="glass-card h-100 overflow-hidden border-0 hover-scale" 
-                                            style={{ cursor: 'pointer' }} 
-                                            onClick={() => window.location.href = `/blog/${post.slug}`}
+                                        <Link 
+                                            to={`/blog/${post.slug}`}
+                                            className="glass-card h-100 overflow-hidden border-0 hover-scale text-decoration-none" 
                                         >
                                             <div style={{ height: '220px', overflow: 'hidden' }}>
                                                 <img 
@@ -662,7 +662,7 @@ const Home = () => {
                                                 </p>
                                                 <div className="text-orange small fw-bold spacing-1">READ MORE →</div>
                                             </div>
-                                        </div>
+                                        </Link>
                                     </motion.div>
                                 </Col>
                             ))}

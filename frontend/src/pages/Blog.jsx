@@ -117,7 +117,6 @@ const Blog = () => {
                                             role="link"
                                             tabIndex={0}
                                             aria-label={`Read more about ${post.title}`}
-                                            onKeyDown={(e) => e.key === 'Enter' && (window.location.href = `/blog/${post.slug}`)}
                                         >
                                             <div className="position-relative overflow-hidden" style={{ height: '250px' }}>
                                                 <Card.Img 
