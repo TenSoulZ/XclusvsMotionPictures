@@ -38,7 +38,6 @@ const Footer = () => {
                             <li className="mb-2"><Link to="/disclaimer" className="text-decoration-none text-secondary hover-orange transition-all">Disclaimer</Link></li>
                             <li className="mb-2"><Link to="/privacy-policy" className="text-decoration-none text-secondary hover-orange transition-all">Privacy Policy</Link></li>
                             <li className="mb-2"><Link to="/terms-and-conditions" className="text-decoration-none text-secondary hover-orange transition-all">Terms & Conditions</Link></li>
-                            <li className="mb-2"><Link to="/login" className="text-decoration-none text-secondary hover-orange transition-all">Admin Login</Link></li>
                         </ul>
                     </Col>
                     <Col md={3} className="mb-4">
