@@ -28,6 +28,14 @@ api.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Token ${token}`;
         }
+        
+        // Prevent browser/CDN caching of GET requests
+        if (config.method?.toLowerCase() === 'get') {
+            config.params = {
+                ...config.params,
+                _t: new Date().getTime()
+            };
+        }
         return config;
     },
     (error) => {

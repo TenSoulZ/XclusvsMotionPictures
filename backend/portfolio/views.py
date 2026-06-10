@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_page, never_cache
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -124,6 +124,7 @@ class TeamMemberViewSet(viewsets.ModelViewSet):
     pagination_class = None
     permission_classes = [IsAdminOrReadOnly]
 
+@method_decorator(never_cache, name='dispatch')
 class CategoryViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing content categories.
@@ -174,6 +175,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
 
+@method_decorator(never_cache, name='dispatch')
 class BrandViewSet(viewsets.ModelViewSet):
     """
     ViewSet for partner brands.
@@ -185,6 +187,7 @@ class BrandViewSet(viewsets.ModelViewSet):
 
 
 
+@method_decorator(never_cache, name='dispatch')
 class TestimonialViewSet(viewsets.ModelViewSet):
     """
     ViewSet for client testimonials.
