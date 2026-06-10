@@ -3,7 +3,7 @@ import { Container, Button, Modal, Nav, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
-import { FaPlus, FaTimesCircle, FaBroadcastTower, FaEye, FaVideo, FaImage, FaStar, FaPenNib, FaEnvelope, FaMoneyBillAlt, FaTrash, FaSignOutAlt, FaExternalLinkAlt, FaTools, FaWhatsapp, FaCheckSquare, FaSquare } from 'react-icons/fa';
+import { FaPlus, FaTimesCircle, FaBroadcastTower, FaEye, FaVideo, FaImage, FaStar, FaPenNib, FaEnvelope, FaMoneyBillAlt, FaTrash, FaSignOutAlt, FaExternalLinkAlt, FaTools, FaWhatsapp, FaCheckSquare, FaSquare, FaFolder } from 'react-icons/fa';
 import { useToast } from '../contexts/ToastContext';
 import { validateImage, formatFileSize, createImagePreview } from '../utils/imageValidation';
 import ReactQuill from 'react-quill-new';
@@ -152,11 +152,12 @@ const AdminDashboard = () => {
             else if (activeTab === 'team') setTeam(data);
             else if (activeTab === 'pricing') setPricingPlans(data);
             else if (activeTab === 'newsletter') setSubscribers(data);
+            else if (activeTab === 'categories') setCategories(data);
 
             setTotalCount(count);
             
             // Fetch categories if needed
-            if (categories.length === 0) {
+            if (categories.length === 0 || activeTab === 'categories') {
                 const catRes = await api.get('/categories/');
                 setCategories(catRes.data.results || catRes.data);
             }
@@ -207,12 +208,23 @@ const AdminDashboard = () => {
     const handleAddTrigger = useCallback(() => {
         setIsEditing(false);
         setEditId(null);
+        
+        let defaultCategory = 'wedding';
+        if (activeTab === 'photos' && categories.length > 0) {
+            const firstPhotoCat = categories.find(c => c.type === 'photo' || c.type === 'both');
+            if (firstPhotoCat) defaultCategory = firstPhotoCat.name;
+        } else if (activeTab === 'videos' && categories.length > 0) {
+            const firstVideoCat = categories.find(c => c.type === 'video' || c.type === 'both');
+            if (firstVideoCat) defaultCategory = firstVideoCat.name;
+        }
+
         setNewItem({ 
             title: '', 
             description: '', 
             url: '', 
             image: null, 
-            category: activeTab === 'equipment' ? 'Camera' : (categories.length > 0 ? categories[0].name.toLowerCase() : 'wedding'), 
+            category: activeTab === 'equipment' ? 'Camera' : defaultCategory, 
+            type: 'both', // default for categories
             is_featured: false, 
             website_url: '',
             client_name: '',
@@ -320,6 +332,9 @@ const AdminDashboard = () => {
             baseItem.features = item.features;
             baseItem.is_popular = item.is_popular;
             baseItem.order = item.order;
+        } else if (activeTab === 'categories') {
+            baseItem.title = item.name;
+            baseItem.type = item.type;
         }
 
         setNewItem(baseItem);
@@ -482,6 +497,7 @@ const AdminDashboard = () => {
             else if (activeTab === 'team') removeFromState(setTeam);
             else if (activeTab === 'pricing') removeFromState(setPricingPlans);
             else if (activeTab === 'newsletter') removeFromState(setSubscribers);
+            else if (activeTab === 'categories') removeFromState(setCategories);
             
             setTotalCount(prev => Math.max(0, prev - 1));
             setItemToDelete(null);
@@ -536,7 +552,7 @@ const AdminDashboard = () => {
 
         try {
             let payload;
-            const isMultipart = !['videos', 'live', 'pricing'].includes(activeTab);
+            const isMultipart = !['videos', 'live', 'pricing', 'categories'].includes(activeTab);
 
             if (isMultipart) {
                 payload = new FormData();
@@ -573,7 +589,7 @@ const AdminDashboard = () => {
                     if (newItem.image) payload.append('image', newItem.image);
                 }
             } else {
-                // Handling JSON payloads (videos, live, pricing)
+                // Handling JSON payloads (videos, live, pricing, categories)
                 let cleanUrl = newItem.url;
                 if (cleanUrl?.trim().startsWith('<iframe')) {
                     const srcMatch = cleanUrl.match(/src="([^"]+)"/);
@@ -604,6 +620,11 @@ const AdminDashboard = () => {
                         features: newItem.features,
                         is_popular: newItem.is_popular,
                         order: newItem.order
+                    };
+                } else if (activeTab === 'categories') {
+                    payload = {
+                        name: newItem.title,
+                        type: newItem.type || 'both'
                     };
                 }
             }
@@ -654,6 +675,7 @@ const AdminDashboard = () => {
         { id: 'dashboard', label: 'Overview', icon: <FaEye /> },
         { id: 'videos', label: 'Videos', icon: <FaVideo /> },
         { id: 'photos', label: 'Photos', icon: <FaImage /> },
+        { id: 'categories', label: 'Categories', icon: <FaFolder /> },
         { id: 'brands', label: 'Brands', icon: <FaStar /> },
         { id: 'testimonials', label: 'Testimonials', icon: <FaStar /> },
         { id: 'blog', label: 'Blog', icon: <FaPenNib /> },
@@ -693,7 +715,8 @@ const AdminDashboard = () => {
             'equipment': equipment,
             'team': team,
             'pricing': pricingPlans,
-            'newsletter': subscribers
+            'newsletter': subscribers,
+            'categories': categories
         }[activeTab] || [];
         
         if (!searchTerm) return rawData;
@@ -707,7 +730,7 @@ const AdminDashboard = () => {
             (item.subject?.toLowerCase().includes(term)) ||
             (item.message?.toLowerCase().includes(term))
         );
-    }, [activeTab, videos, photos, brands, messages, testimonials, blogPosts, liveStreams, equipment, team, pricingPlans, subscribers, searchTerm]);
+    }, [activeTab, videos, photos, brands, messages, testimonials, blogPosts, liveStreams, equipment, team, pricingPlans, subscribers, categories, searchTerm]);
 
     const renderDashboardOverview = () => {
         // Calculate unread count safely
@@ -857,7 +880,7 @@ const AdminDashboard = () => {
                                 </div>
                                 {activeTab !== 'messages' && activeTab !== 'newsletter' && (
                                     <Button variant="brand" className="px-4 py-2" onClick={handleAddTrigger}>
-                                        <FaPlus className="me-2" /> Add {activeTab === 'videos' ? 'Video' : activeTab === 'photos' ? 'Photo' : activeTab === 'brands' ? 'Brand' : activeTab === 'testimonials' ? 'Testimonial' : activeTab === 'blog' ? 'Blog Post' : activeTab === 'team' ? 'Team Member' : activeTab === 'pricing' ? 'Pricing Plan' : activeTab === 'equipment' ? 'Equipment' : 'Live Stream'}
+                                        <FaPlus className="me-2" /> Add {activeTab === 'videos' ? 'Video' : activeTab === 'photos' ? 'Photo' : activeTab === 'brands' ? 'Brand' : activeTab === 'testimonials' ? 'Testimonial' : activeTab === 'blog' ? 'Blog Post' : activeTab === 'team' ? 'Team Member' : activeTab === 'pricing' ? 'Pricing Plan' : activeTab === 'equipment' ? 'Equipment' : activeTab === 'categories' ? 'Category' : 'Live Stream'}
                                     </Button>
                                 )}
                                 {activeTab === 'newsletter' && (
@@ -1049,6 +1072,11 @@ const AdminDashboard = () => {
                         You are about to remove <span className="text-white fw-bold">{itemToDelete?.title || itemToDelete?.name || 'this item'}</span>. 
                         This action is irreversible.
                     </p>
+                    {activeTab === 'categories' && (
+                        <p className="text-danger small fw-bold mt-2 mb-0 px-2">
+                            ⚠️ Warning: Deleting this category will delete all photos and videos belonging to it!
+                        </p>
+                    )}
                 </Modal.Body>
                 <Modal.Footer className="border-0 px-4 pb-4 pt-0 gap-2">
                     <Button variant="outline-light" className="flex-grow-1 rounded-pill" onClick={() => setShowDeleteModal(false)} disabled={isDeleting}>

@@ -206,7 +206,6 @@ const DashboardRow = memo(({
                     <td className="bg-transparent align-middle text-secondary small text-truncate" style={{maxWidth: '200px'}}>{item.description}</td>
                 </>
             )}
-            
             {/* Pricing */}
             {activeTab === 'pricing' && (
                 <>
@@ -217,6 +216,19 @@ const DashboardRow = memo(({
                         <Badge bg={item.is_popular ? "orange" : "secondary"}>{item.is_popular ? 'Yes' : 'No'}</Badge>
                     </td>
                     <td className="bg-transparent align-middle">{item.order}</td>
+                </>
+            )}
+
+            {/* Categories */}
+            {activeTab === 'categories' && (
+                <>
+                    <td className="bg-transparent align-middle fw-bold">{item.name}</td>
+                    <td className="bg-transparent align-middle">
+                        <Badge bg="dark" className="border border-secondary text-secondary fw-normal text-capitalize">
+                            {item.type === 'both' ? 'Both' : item.type === 'video' ? 'Video' : 'Photo/Gallery'}
+                        </Badge>
+                    </td>
+                    <td className="bg-transparent align-middle text-secondary small">{item.slug}</td>
                 </>
             )}
 
@@ -358,6 +370,12 @@ const DashboardTable = memo(({
                                 <th className="bg-transparent text-secondary">Price</th>
                                 <th className="bg-transparent text-secondary">Popular</th>
                                 <th className="bg-transparent text-secondary">Order</th>
+                            </>
+                        ) : activeTab === 'categories' ? (
+                            <>
+                                <th className="bg-transparent text-secondary">Name</th>
+                                <th className="bg-transparent text-secondary">Type</th>
+                                <th className="bg-transparent text-secondary">Slug</th>
                             </>
                         ) : activeTab === 'newsletter' ? (
                             <>

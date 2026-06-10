@@ -63,7 +63,7 @@ const Videos = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await api.get('/categories/');
+                const res = await api.get('/categories/?type=video');
                 setCategories(res.data.results || res.data);
             } catch (error) {
                 console.error("Error fetching categories:", error);

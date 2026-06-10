@@ -23,10 +23,21 @@ const DashboardModal = ({
     formatFileSize,
     isLoading = false
 }) => {
+    const filteredCategories = React.useMemo(() => {
+        if (activeTab === 'videos') {
+            return categories.filter(cat => cat.type === 'video' || cat.type === 'both');
+        }
+        if (activeTab === 'photos') {
+            return categories.filter(cat => cat.type === 'photo' || cat.type === 'both');
+        }
+        return categories;
+    }, [categories, activeTab]);
+
     const getTitle = () => {
         const type = {
             'videos': 'Video',
             'photos': 'Photo',
+            'categories': 'Category',
             'brands': 'Brand',
             'testimonials': 'Testimonial',
             'blog': 'Blog Post',
@@ -69,9 +80,9 @@ const DashboardModal = ({
                     ) : (
                         <>
                             <Row>
-                                <Col md={activeTab === 'brands' || activeTab === 'testimonials' || activeTab === 'blog' || activeTab === 'live' || activeTab === 'pricing' ? 12 : 8}>
+                                <Col md={['brands', 'testimonials', 'blog', 'live', 'pricing', 'categories'].includes(activeTab) ? 12 : 8}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>{activeTab === 'brands' ? 'Brand Name' : activeTab === 'testimonials' ? 'Client Name' : activeTab === 'pricing' ? 'Plan Name' : activeTab === 'equipment' ? 'Equipment Name' : 'Title'}</Form.Label>
+                                        <Form.Label>{activeTab === 'brands' ? 'Brand Name' : activeTab === 'testimonials' ? 'Client Name' : activeTab === 'pricing' ? 'Plan Name' : activeTab === 'equipment' ? 'Equipment Name' : activeTab === 'categories' ? 'Category Name' : 'Title'}</Form.Label>
                                         <Form.Control 
                                             type="text" 
                                             className="bg-black border-secondary text-white" 
@@ -84,7 +95,7 @@ const DashboardModal = ({
                                         />
                                     </Form.Group>
                                 </Col>
-                                {activeTab !== 'brands' && activeTab !== 'testimonials' && activeTab !== 'blog' && activeTab !== 'team' && activeTab !== 'live' && activeTab !== 'pricing' && (
+                                {activeTab !== 'brands' && activeTab !== 'testimonials' && activeTab !== 'blog' && activeTab !== 'team' && activeTab !== 'live' && activeTab !== 'pricing' && activeTab !== 'categories' && (
                                     <Col md={4}>
                                         <Form.Group className="mb-3">
                                             <Form.Label>Category</Form.Label>
@@ -104,8 +115,8 @@ const DashboardModal = ({
                                                         <option value="Accessory">Accessory</option>
                                                     </>
                                                 ) : (
-                                                    categories.length > 0 ? (
-                                                        categories.map(cat => (
+                                                    filteredCategories.length > 0 ? (
+                                                        filteredCategories.map(cat => (
                                                             <option key={cat.id} value={cat.name}>{cat.name}</option>
                                                         ))
                                                     ) : (
@@ -118,7 +129,7 @@ const DashboardModal = ({
                                 )}
                             </Row>
 
-                            {activeTab !== 'brands' && activeTab !== 'live' && activeTab !== 'pricing' && (
+                            {activeTab !== 'brands' && activeTab !== 'live' && activeTab !== 'pricing' && activeTab !== 'categories' && (
                                 <Form.Group className="mb-3">
                                     <Form.Label>{activeTab === 'testimonials' ? 'Feedback Content' : activeTab === 'blog' ? 'Article Content' : 'Description'}</Form.Label>
                                     
@@ -149,6 +160,21 @@ const DashboardModal = ({
                                             onChange={e => setNewItem({...newItem, description: e.target.value})} 
                                         />
                                     )}
+                                </Form.Group>
+                            )}
+
+                            {activeTab === 'categories' && (
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Category Type</Form.Label>
+                                    <Form.Select 
+                                        className="bg-black border-secondary text-white"
+                                        value={newItem.type || 'both'} 
+                                        onChange={e => setNewItem({...newItem, type: e.target.value})}
+                                    >
+                                        <option value="both">Both (Video & Photo/Gallery)</option>
+                                        <option value="video">Video Only</option>
+                                        <option value="photo">Photo/Gallery Only</option>
+                                    </Form.Select>
                                 </Form.Group>
                             )}
                         </>
@@ -360,7 +386,7 @@ const DashboardModal = ({
                         </Form.Group>
                     )}
 
-                    {activeTab !== 'brands' && activeTab !== 'testimonials' && activeTab !== 'blog' && activeTab !== 'live' && activeTab !== 'equipment' && (
+                    {activeTab !== 'brands' && activeTab !== 'testimonials' && activeTab !== 'blog' && activeTab !== 'live' && activeTab !== 'equipment' && activeTab !== 'categories' && (
                         <Form.Check 
                             type="switch"
                             label="Mark as Featured"

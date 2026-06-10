@@ -10,8 +10,14 @@ class Category(models.Model):
     Model representing content categories (e.g., Wedding, Corporate, Music Video).
     Used to organize both videos and photos.
     """
+    TYPE_CHOICES = [
+        ('video', 'Video'),
+        ('photo', 'Photo/Gallery'),
+        ('both', 'Both'),
+    ]
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='both')
 
     def save(self, *args, **kwargs):
         if not self.slug:

@@ -13,14 +13,29 @@ def seed():
     print("Seeding data...")
 
     # Categories
-    categories = ['Wedding', 'Corporate', 'Event', 'Music Video', 'Documentary', 'Fashion']
+    categories_to_seed = [
+        ('Wedding', 'both'),
+        ('Corporate', 'both'),
+        ('Lobola', 'photo'),
+        ('Live Shows', 'both'),
+        ('Church Services', 'photo'),
+        ('Outdoor', 'photo'),
+        ('Adverts', 'video'),
+        ('Dynamic Intro', 'video'),
+        ('Fashion Films', 'video'),
+        ('Music Videos', 'video'),
+        ('Logo Intros & Outros', 'video'),
+    ]
     cat_objs = []
-    for name in categories:
-        slug = name.lower().replace(' ', '-')
-        obj, created = Category.objects.get_or_create(name=name, defaults={'slug': slug})
+    for name, cat_type in categories_to_seed:
+        slug = name.lower().replace(' ', '-').replace('&', 'and')
+        obj, created = Category.objects.get_or_create(name=name, defaults={'slug': slug, 'type': cat_type})
+        if not created and obj.type != cat_type:
+            obj.type = cat_type
+            obj.save()
         cat_objs.append(obj)
         if created:
-            print(f"Created category: {name}")
+            print(f"Created category: {name} ({cat_type})")
 
     # Superuser
     if not User.objects.filter(username='admin').exists():

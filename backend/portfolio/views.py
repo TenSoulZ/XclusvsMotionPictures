@@ -133,6 +133,17 @@ class CategoryViewSet(viewsets.ModelViewSet):
     pagination_class = None
     permission_classes = [IsAdminOrReadOnly]
 
+    def get_queryset(self):
+        queryset = Category.objects.all()
+        cat_type = self.request.query_params.get('type')
+        if cat_type:
+            from django.db.models import Q
+            if cat_type == 'video':
+                queryset = queryset.filter(Q(type='video') | Q(type='both'))
+            elif cat_type == 'photo':
+                queryset = queryset.filter(Q(type='photo') | Q(type='both'))
+        return queryset
+
     @method_decorator(cache_page(60 * 60 * 2))  # Cache for 2 hours
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
