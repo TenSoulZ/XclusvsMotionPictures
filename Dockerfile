@@ -1,12 +1,11 @@
-# Use Python 3.11 slim image
+# Root Dockerfile for Koyeb deployment
 FROM python:3.11-slim
 
-# Prevent Python from writing .pyc files and buffer stdout/stderr
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PORT=8000
 
-WORKDIR /app
+WORKDIR /app/backend
 
 # Install build dependencies for C extensions (Pillow, psycopg2, etc.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -19,12 +18,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Upgrade pip
 RUN pip install --no-cache-dir --upgrade pip
 
-# Install Python dependencies
-COPY requirements.txt .
+# Install Python requirements
+COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend codebase
-COPY . .
+# Copy backend application directory
+COPY backend/ ./
 
 # Expose HTTP port
 EXPOSE 8000
