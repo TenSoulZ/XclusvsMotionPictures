@@ -30,13 +30,13 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
-# Ensure Render hostnames and wildcards are included
-ALLOWED_HOSTS.extend(['*', '.onrender.com', 'xmp-backend.onrender.com'])
+# Ensure Render, Koyeb, and wildcards are included
+ALLOWED_HOSTS.extend(['*', '.onrender.com', '.koyeb.app'])
 
-# On Render, the RENDER_EXTERNAL_HOSTNAME is automatically provided
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+# External hostnames dynamically provided by Render or Koyeb
+EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME') or os.environ.get('KOYEB_PUBLIC_DOMAIN')
+if EXTERNAL_HOSTNAME and EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(EXTERNAL_HOSTNAME)
 
 
 # Application definition
