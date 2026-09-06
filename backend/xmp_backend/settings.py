@@ -111,11 +111,15 @@ WSGI_APPLICATION = 'xmp_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+raw_db_url = config('DATABASE_URL', default='').strip()
+if not raw_db_url or not any(raw_db_url.startswith(scheme) for scheme in ['postgres://', 'postgresql://', 'sqlite://']):
+    raw_db_url = f'sqlite:///{BASE_DIR / "db.sqlite3"}'
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=config('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}'),
+    'default': dj_database_url.parse(
+        raw_db_url,
         conn_max_age=600,
-        ssl_require=False  # Set to True if exclusively using SSL, DO handles this often via URL
+        ssl_require=False
     )
 }
 
