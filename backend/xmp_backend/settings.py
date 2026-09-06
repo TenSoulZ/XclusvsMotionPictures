@@ -111,7 +111,7 @@ WSGI_APPLICATION = 'xmp_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-raw_db_url = config('DATABASE_URL', default='').strip()
+raw_db_url = config('DATABASE_URL', default='').strip().strip('"\'').strip()
 if not raw_db_url or not any(raw_db_url.startswith(scheme) for scheme in ['postgres://', 'postgresql://', 'sqlite://']):
     raw_db_url = f'sqlite:///{BASE_DIR / "db.sqlite3"}'
 
