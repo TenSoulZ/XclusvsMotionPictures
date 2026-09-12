@@ -1,0 +1,7 @@
+{
+  "name": "xclusvs-motion-pictures-root",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build"
+  }
+}
