@@ -73,20 +73,20 @@ if DEBUG:
 else:
     # Allow all origins for now to troubleshoot connection issues, 
     # but still support specific ones from environment variables.
-    CORS_ALLOWED_ORIGINS_RAW = config('CORS_ALLOWED_ORIGINS', default='https://xmp-frontend.onrender.com', cast=Csv())
+    CORS_ALLOWED_ORIGINS_RAW = config('CORS_ALLOWED_ORIGINS', default='https://xmp-frontend.onrender.com,https://xmp.co.zw,https://www.xmp.co.zw', cast=Csv())
     CORS_ALLOWED_ORIGINS = [origin.rstrip('/') for origin in CORS_ALLOWED_ORIGINS_RAW]
     
-    # If we're on Render, we might want to be more permissive during setup
-    if config('RENDER', default=False, cast=bool):
+    # Enable permissive CORS on cloud deployment providers (Render, Koyeb)
+    if config('RENDER', default=False, cast=bool) or config('KOYEB', default=False, cast=bool) or os.environ.get('KOYEB_PUBLIC_DOMAIN'):
         CORS_ALLOW_ALL_ORIGINS = True
 
-    CSRF_TRUSTED_ORIGINS_RAW = config('CSRF_TRUSTED_ORIGINS', default='https://xmp-frontend.onrender.com', cast=Csv())
+    CSRF_TRUSTED_ORIGINS_RAW = config('CSRF_TRUSTED_ORIGINS', default='https://xmp-frontend.onrender.com,https://xmp.co.zw,https://www.xmp.co.zw', cast=Csv())
     CSRF_TRUSTED_ORIGINS = [origin.rstrip('/') for origin in CSRF_TRUSTED_ORIGINS_RAW]
     
-    # Add the current host to trusted origins if on Render
-    RENDER_EXTERNAL_URL = config('RENDER_EXTERNAL_URL', default=None)
-    if RENDER_EXTERNAL_URL:
-        CSRF_TRUSTED_ORIGINS.append(RENDER_EXTERNAL_URL.rstrip('/'))
+    # Add external hostname to trusted origins
+    EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME') or os.environ.get('KOYEB_PUBLIC_DOMAIN')
+    if EXTERNAL_HOSTNAME:
+        CSRF_TRUSTED_ORIGINS.append(f"https://{EXTERNAL_HOSTNAME}".rstrip('/'))
 
 ROOT_URLCONF = 'xmp_backend.urls'
 
