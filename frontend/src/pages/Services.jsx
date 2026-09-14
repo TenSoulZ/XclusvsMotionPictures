@@ -1,11 +1,12 @@
 import React from 'react';
 import { Container, Row, Col, Button, Badge } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { FaVideo, FaCamera, FaGlobe, FaEdit, FaMicrophone, FaBroadcastTower, FaLightbulb, FaBullhorn } from 'react-icons/fa';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { FaVideo, FaCamera, FaGlobe, FaEdit, FaMicrophone, FaBroadcastTower, FaLightbulb, FaBullhorn, FaShareAlt } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import api from '../utils/api';
 import SEO from '../components/SEO';
 import Skeleton from '../components/Skeleton';
+import ShareModal from '../components/ShareModal';
 
 /**
  * Services component - Showcases the company's service offerings and pricing plans.
@@ -24,9 +25,29 @@ const Services = () => {
     ];
 
     const navigate = useNavigate();
-    const [selectedService, setSelectedService] = React.useState('video');
+    const [searchParams] = useSearchParams();
+    const initialService = searchParams.get('service') || 'video';
+    const [selectedService, setSelectedService] = React.useState(initialService);
     const [pricingData, setPricingData] = React.useState({});
     const [loading, setLoading] = React.useState(true);
+    const [shareData, setShareData] = React.useState(null);
+    const [showShareModal, setShowShareModal] = React.useState(false);
+
+    const handleSharePlan = (tier) => {
+        const currentServiceObj = services.find(s => s.id === selectedService);
+        const serviceTitle = currentServiceObj ? currentServiceObj.title : 'Service';
+        const baseUrl = `${window.location.origin}${window.location.pathname}`;
+        const shareUrl = `${baseUrl}?service=${selectedService}&plan=${encodeURIComponent(tier.plan)}`;
+        setShareData({
+            title: `${serviceTitle} - ${tier.plan} Plan`,
+            service: serviceTitle,
+            plan: tier.plan,
+            price: tier.price,
+            text: `Check out the ${tier.plan} plan for ${serviceTitle} starting at $${tier.price} from Xclusvs Motion Pictures!`,
+            url: shareUrl
+        });
+        setShowShareModal(true);
+    };
 
     React.useEffect(() => {
         const fetchPricing = async () => {
@@ -163,18 +184,28 @@ const Services = () => {
                                                 </li>
                                             ))}
                                         </ul>
-                                        <Button 
-                                            variant={tier.popular ? "brand" : "outline-light"} 
-                                            className="w-100 py-3 fw-bold rounded-pill mt-auto shadow-hover"
-                                            onClick={() => navigate('/contact', { 
-                                                state: { 
-                                                    plan: tier.plan, 
-                                                    service: services.find(s => s.id === selectedService).title 
-                                                } 
-                                            })}
-                                        >
-                                            {tier.plan === 'Corporate' || tier.plan === 'Enterprise' || tier.plan === 'Dominance' ? 'GET QUOTE' : 'CHOOSE PLAN'}
-                                        </Button>
+                                        <div className="d-flex flex-column gap-2 mt-auto w-100">
+                                            <Button 
+                                                variant={tier.popular ? "brand" : "outline-light"} 
+                                                className="w-100 py-3 fw-bold rounded-pill shadow-hover"
+                                                onClick={() => navigate('/contact', { 
+                                                    state: { 
+                                                        plan: tier.plan, 
+                                                        service: services.find(s => s.id === selectedService).title 
+                                                    } 
+                                                })}
+                                            >
+                                                {tier.plan === 'Corporate' || tier.plan === 'Enterprise' || tier.plan === 'Dominance' ? 'GET QUOTE' : 'CHOOSE PLAN'}
+                                            </Button>
+
+                                            <Button 
+                                                variant="outline-secondary" 
+                                                className="w-100 py-2 fw-bold rounded-pill text-white border-secondary border-opacity-50 d-flex align-items-center justify-content-center gap-2 shadow-hover small"
+                                                onClick={() => handleSharePlan(tier)}
+                                            >
+                                                <FaShareAlt /> Share Price
+                                            </Button>
+                                        </div>
                                     </motion.div>
                                 </Col>
                             )) : (
@@ -187,6 +218,12 @@ const Services = () => {
                     </motion.div>
                 </div>
             </Container>
+
+            <ShareModal 
+                show={showShareModal} 
+                onHide={() => setShowShareModal(false)} 
+                shareData={shareData} 
+            />
 
             <style>{`
                 .active-service {
