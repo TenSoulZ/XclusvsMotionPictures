@@ -49,23 +49,66 @@ const Services = () => {
         setShowShareModal(true);
     };
 
+    const defaultPlans = {
+        video: [
+            { plan: 'Essential', price: '350', features: ['Half Day Coverage (4 hrs)', 'HD Highlight Reel (3-5 min)', 'Color Grading & Audio Sync', 'Digital Delivery', '1 Revision Round'], popular: false },
+            { plan: 'Pro Cinematic', price: '750', features: ['Full Day Coverage (8 hrs)', '4K Cinematic Film + Teaser', 'Drone Aerial Footage', 'Professional Sound Design', '2 Revision Rounds'], popular: true },
+            { plan: 'Enterprise', price: '1,500', features: ['Multi-Day / Multi-Camera', 'Full RAW Footage Delivery', 'Commercial Broadcast Rights', '4K Master + Custom Teasers', 'Unlimited Revisions'], popular: false }
+        ],
+        photo: [
+            { plan: 'Starter', price: '200', features: ['2 Hours Session', '25 High-Res Edited Photos', 'Online Private Gallery', '1 Location'], popular: false },
+            { plan: 'Pro Shoot', price: '450', features: ['Half Day Session (4 hrs)', '60 High-Res Edited Photos', 'Skin & Color Retouching', 'Multiple Outfit Changes', 'Commercial Rights'], popular: true },
+            { plan: 'Full Event', price: '900', features: ['Full Day Coverage (8 hrs)', '150+ Edited Photos', 'Second Shooter Included', 'Fast 48-Hour Turnaround', 'Full Print Rights'], popular: false }
+        ],
+        web: [
+            { plan: 'Landing Page', price: '400', features: ['Single Page Responsive Site', 'Modern UI/UX Design', 'Contact Form Integration', 'SEO Optimization', '1 Year Free Hosting'], popular: false },
+            { plan: 'Business Web App', price: '950', features: ['Multi-page Custom Website', 'Dynamic Content & CMS', 'Speed & Performance Tuned', 'Domain Setup & Security', 'Mobile First Responsive'], popular: true },
+            { plan: 'Custom Platform', price: '2,200', features: ['Full-stack Custom App', 'Database & API Backend', 'User Authentication & Admin', 'Payment Gateway Integration', 'Dedicated Support'], popular: false }
+        ],
+        edit: [
+            { plan: 'Basic Cut', price: '150', features: ['Up to 5 min Video', 'Basic Transitions & Cuts', 'Background Music Overlay', '1080p Export'], popular: false },
+            { plan: 'Pro Edit', price: '350', features: ['Up to 20 min Video', 'Cinematic Color Grading', 'Audio Cleaning & Sound Effects', 'Subtitles & Motion Titles', '2 Revisions'], popular: true },
+            { plan: 'Feature Post', price: '800', features: ['Full Length Project', 'Advanced Visual FX & Graphics', 'Multi-cam Audio/Video Sync', 'Broadcast Quality Mastering', 'Priority Turnaround'], popular: false }
+        ],
+        audio: [
+            { plan: 'Voice & Mix', price: '120', features: ['Professional Voiceover Recording', 'Noise Reduction & EQ', 'Mastered Stereo Output'], popular: false },
+            { plan: 'Studio Track', price: '300', features: ['Multi-track Studio Session', 'Vocal Tuning & Compression', 'Custom Background Music', 'High-Res WAV & MP3'], popular: true }
+        ],
+        live: [
+            { plan: 'Single Cam Stream', price: '500', features: ['Single HD Camera Setup', 'Live Audio Feed', 'Stream to 1 Platform (YouTube/FB)', 'Recorded Master Backup'], popular: false },
+            { plan: 'Multi-Cam Live', price: '1,200', features: ['3 Camera Switching Setup', 'Pro Wireless Mics', 'Custom Lower Thirds & Graphics', 'Simulcast to Multiple Platforms'], popular: true }
+        ],
+        brand: [
+            { plan: 'Identity Kit', price: '300', features: ['Logo Design & Variations', 'Brand Color Palette', 'Typography & Fonts', 'Vector Master Files'], popular: false },
+            { plan: 'Complete Brand', price: '700', features: ['Full Brand Style Guide', 'Social Media Templates', 'Business Card & Letterhead', 'Brand Usage Guidelines'], popular: true }
+        ],
+        marketing: [
+            { plan: 'Growth Campaign', price: '450', features: ['Social Media Strategy', 'Targeted Ad Campaign Setup', 'Monthly Analytics Report', 'SEO Audit & Optimization'], popular: true }
+        ]
+    };
+
     React.useEffect(() => {
         const fetchPricing = async () => {
             try {
                 const res = await api.get('/pricing-plans/');
                 const data = res.data.results || res.data;
                 
-                const grouped = data.reduce((acc, plan) => {
-                    if (!acc[plan.service_type]) acc[plan.service_type] = [];
-                    acc[plan.service_type].push({
-                        plan: plan.plan_name,
-                        price: plan.price,
-                        features: plan.features_list,
-                        popular: plan.is_popular
-                    });
-                    return acc;
-                }, {});
-                setPricingData(grouped);
+                if (Array.isArray(data) && data.length > 0) {
+                    const grouped = data.reduce((acc, plan) => {
+                        if (!acc[plan.service_type]) acc[plan.service_type] = [];
+                        const featList = Array.isArray(plan.features_list)
+                            ? plan.features_list
+                            : (typeof plan.features === 'string' ? plan.features.split('\n').filter(Boolean) : []);
+                        acc[plan.service_type].push({
+                            plan: plan.plan_name,
+                            price: plan.price,
+                            features: featList.length ? featList : ['Custom Features'],
+                            popular: plan.is_popular
+                        });
+                        return acc;
+                    }, {});
+                    setPricingData(grouped);
+                }
             } catch (error) {
                 console.error("Error fetching pricing plans:", error);
             } finally {
@@ -158,16 +201,22 @@ const Services = () => {
                             {services.find(s => s.id === selectedService).title.toUpperCase()} <span className="text-orange">PLANS</span>
                         </h2>
                         
-                        <Row className="justify-content-center align-items-stretch">
-                            {pricingData[selectedService] ? pricingData[selectedService].map((tier, idx) => (
-                                <Col lg={4} key={idx} className="mb-4">
-                                    <motion.div 
-                                        whileHover={{ y: -10 }}
-                                        className={`glass-card p-5 text-center h-100 position-relative d-flex flex-column ${
-                                            tier.popular ? 'active-tier border-orange shadow-lg z-1' : 'border-secondary border-opacity-10'
-                                        }`}
-                                        style={tier.popular ? { transform: 'scale(1.05)', borderColor: 'var(--brand-orange)' } : {}}
-                                    >
+                        {(() => {
+                            const currentPlans = (pricingData[selectedService] && pricingData[selectedService].length > 0)
+                                ? pricingData[selectedService]
+                                : (defaultPlans[selectedService] || []);
+                            
+                            return (
+                                <Row className="justify-content-center align-items-stretch">
+                                    {currentPlans.length > 0 ? currentPlans.map((tier, idx) => (
+                                        <Col lg={4} key={idx} className="mb-4">
+                                            <motion.div 
+                                                whileHover={{ y: -10 }}
+                                                className={`glass-card p-5 text-center h-100 position-relative d-flex flex-column ${
+                                                    tier.popular ? 'active-tier border-orange shadow-lg z-1' : 'border-secondary border-opacity-10'
+                                                }`}
+                                                style={tier.popular ? { transform: 'scale(1.05)', borderColor: 'var(--brand-orange)' } : {}}
+                                            >
                                         {tier.popular && (
                                             <Badge bg="orange" className="position-absolute top-0 start-50 translate-middle px-3 py-2">MOST POPULAR</Badge>
                                         )}
@@ -214,7 +263,9 @@ const Services = () => {
                                     <Button variant="brand" href="/contact" className="rounded-pill px-5">Get Quote</Button>
                                 </Col>
                             )}
-                        </Row>
+                                </Row>
+                            );
+                        })()}
                     </motion.div>
                 </div>
             </Container>
