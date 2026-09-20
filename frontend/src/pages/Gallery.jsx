@@ -47,7 +47,11 @@ const Gallery = () => {
     };
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [searchQuery, setSearchQuery] = useState('');
     const [hierarchyFilter, setHierarchyFilter] = useState('All');
+    const pageSize = 12;
 
     const getPhotoHierarchy = (photo, index) => {
         if (photo.hierarchy) return photo.hierarchy;
