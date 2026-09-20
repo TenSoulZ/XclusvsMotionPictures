@@ -49,10 +49,10 @@ const About = () => {
                                 OUR <span className="text-transparent" style={{ WebkitTextStroke: '2px #ff6600', color: 'transparent' }}>STORY</span>
                             </motion.h1>
                             <p className="lead text-white mb-4 fs-4">
-                                Delivering top-notch visual solutions since 2017.
+                                Producing Visuals with Purpose and Passion.
                             </p>
                             <p className="text-white-50" style={{ maxWidth: '90%' }}>
-                                Established in 2017 in Harare, Zimbabwe, Xclusvs Motion Pictures is a dynamic production company dedicated to producing high-quality visual content. Our mission is to provide innovative and effective visual solutions that help our clients achieve their goals. We strive to build long-term relationships founded on trust, creativity, and exceptional service.
+                                Established in 2017 in Harare, Zimbabwe, Xclusvs Motion Pictures exists to bridge the gap between imagination and reality. We believe every brand, story, and event possesses a unique heartbeat. Our core purpose is to elevate that heartbeat into high-impact cinematic visual experiences—empowering businesses, visionaries, and creators to inspire, connect, and leave an indelible legacy. Built on trust, unyielding creativity, and technical mastery, we do not just capture video—we craft timeless visual art.
                             </p>
                         </Col>
                         <Col lg={6}>
@@ -122,7 +122,7 @@ const About = () => {
             {/* Team */}
             <section className="py-5">
                 <Container>
-                    <h2 className="text-center mb-5 display-4 fw-bold">CREATIVE <span className="text-orange">MINDS</span></h2>
+                    <h2 className="text-center mb-5 display-4 fw-bold">THE <span className="text-orange">CREATIVE MINDS</span></h2>
                     <Row className="g-4">
                         {loading ? (
                             Array.from({ length: 3 }).map((_, idx) => (

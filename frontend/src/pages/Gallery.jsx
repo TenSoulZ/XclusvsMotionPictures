@@ -47,10 +47,26 @@ const Gallery = () => {
     };
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
-    const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState('All');
-    const [searchQuery, setSearchQuery] = useState('');
-    const pageSize = 12;
+    const [hierarchyFilter, setHierarchyFilter] = useState('All');
+
+    const getPhotoHierarchy = (photo, index) => {
+        if (photo.hierarchy) return photo.hierarchy;
+        if (photo.is_featured || index % 3 === 0) return 'Premier Showcase';
+        if (index % 2 === 0) return 'Featured Project';
+        return 'Standard Showcase';
+    };
+
+    const getHierarchyBadgeBg = (tier) => {
+        if (tier.includes('Premier')) return 'danger';
+        if (tier.includes('Featured')) return 'orange';
+        return 'secondary';
+    };
+
+    const filteredPhotos = photos.filter((photo, index) => {
+        if (hierarchyFilter === 'All') return true;
+        const tier = getPhotoHierarchy(photo, index);
+        return tier.toLowerCase().includes(hierarchyFilter.toLowerCase());
+    });
 
     // Fetch categories on mount
     useEffect(() => {
@@ -171,10 +187,10 @@ const Gallery = () => {
                     <p className="lead text-secondary">Capturing moments in their purest form.</p>
                 </div>
 
-                {/* Filters and Search */}
+                {/* Filters, Hierarchy & Search */}
                 <div className="mb-5">
-                    <Row className="align-items-center g-4">
-                        <Col lg={8}>
+                    <Row className="align-items-center g-3">
+                        <Col lg={7}>
                             <div className="d-flex flex-wrap gap-2">
                                 <Button 
                                     variant={selectedCategory === 'All' ? 'brand' : 'outline-light'}
@@ -183,7 +199,7 @@ const Gallery = () => {
                                     aria-pressed={selectedCategory === 'All'}
                                     aria-label="Show all photos"
                                 >
-                                    All
+                                    All Categories
                                 </Button>
                                 {categories.map(cat => (
                                     <Button 
@@ -199,13 +215,24 @@ const Gallery = () => {
                                 ))}
                             </div>
                         </Col>
-                        <Col lg={4}>
-                            <div className="search-bar glass-card d-flex align-items-center px-3 py-2 rounded-pill">
+                        <Col lg={5} className="d-flex gap-2">
+                            <select 
+                                className="form-select bg-black text-white border-secondary border-opacity-25 rounded-pill px-3 py-2 small"
+                                value={hierarchyFilter}
+                                onChange={(e) => setHierarchyFilter(e.target.value)}
+                                aria-label="Filter by Gallery Hierarchy"
+                            >
+                                <option value="All">All Hierarchy Tiers</option>
+                                <option value="Premier">Premier Showcase (Tier 1)</option>
+                                <option value="Featured">Featured Projects (Tier 2)</option>
+                                <option value="Standard">Standard Showcase (Tier 3)</option>
+                            </select>
+                            <div className="search-bar glass-card d-flex align-items-center px-3 py-2 rounded-pill flex-grow-1">
                                 <FaSearch className="text-secondary me-2" />
                                 <input 
                                     type="text" 
-                                    placeholder="Search gallery..." 
-                                    className="bg-transparent border-0 text-white w-100 outline-none"
+                                    placeholder="Search..." 
+                                    className="bg-transparent border-0 text-white w-100 outline-none small"
                                     style={{ outline: 'none' }}
                                     value={searchQuery}
                                     onChange={handleSearchChange}
@@ -236,37 +263,51 @@ const Gallery = () => {
                             transition={{ duration: 0.3 }}
                         >
                             <div className="masonry-grid">
-                                {photos.length > 0 ? photos.map(photo => (
-                                    <motion.div 
-                                        layout
-                                        key={photo.id} 
-                                        className="masonry-item mb-4" 
-                                        onClick={() => setSelectedPhoto(photo)}
-                                        onKeyDown={(e) => e.key === 'Enter' && setSelectedPhoto(photo)}
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ duration: 0.4 }}
-                                        role="button"
-                                        tabIndex={0}
-                                        aria-label={`View ${photo.title}`}
-                                    >
-                                        <div className="photo-card position-relative overflow-hidden rounded-4 glass-card p-2 border-0 shadow-sm">
-                                            <img 
-                                                src={photo.image} 
-                                                alt={photo.title} 
-                                                className="img-fluid rounded-3 w-100" 
-                                                loading="lazy"
-                                                style={{ transition: '0.5s', cursor: 'zoom-in', aspectRatio: 'auto' }}
-                                            />
-                                            <div className="photo-overlay position-absolute bottom-0 start-0 w-100 p-4 pb-3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)', opacity: 0, transition: '0.3s' }}>
-                                                <h5 className="text-white mb-0">{photo.title}</h5>
-                                                <Badge bg="orange" className="mt-2 fw-normal">
-                                                    {photo.category_name || photo.category?.name || 'Photo'}
-                                                </Badge>
+                                {filteredPhotos.length > 0 ? filteredPhotos.map((photo, idx) => {
+                                    const tier = getPhotoHierarchy(photo, idx);
+                                    const badgeBg = getHierarchyBadgeBg(tier);
+                                    return (
+                                        <motion.div 
+                                            layout
+                                            key={photo.id} 
+                                            className="masonry-item mb-4" 
+                                            onClick={() => setSelectedPhoto(photo)}
+                                            onKeyDown={(e) => e.key === 'Enter' && setSelectedPhoto(photo)}
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ duration: 0.4 }}
+                                            role="button"
+                                            tabIndex={0}
+                                            aria-label={`View ${photo.title}`}
+                                        >
+                                            <div className="photo-card position-relative overflow-hidden rounded-4 glass-card p-2 border-0 shadow-sm">
+                                                <img 
+                                                    src={photo.image} 
+                                                    alt={photo.title} 
+                                                    className="img-fluid rounded-3 w-100" 
+                                                    loading="lazy"
+                                                    style={{ transition: '0.5s', cursor: 'zoom-in', aspectRatio: 'auto' }}
+                                                />
+                                                <div className="position-absolute top-0 end-0 p-3 z-2">
+                                                    <Badge bg={badgeBg} className="rounded-pill px-3 py-1 shadow-sm text-uppercase small">
+                                                        {tier}
+                                                    </Badge>
+                                                </div>
+                                                <div className="photo-overlay position-absolute bottom-0 start-0 w-100 p-4 pb-3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)', opacity: 0, transition: '0.3s' }}>
+                                                    <h5 className="text-white mb-1">{photo.title}</h5>
+                                                    <div className="d-flex gap-2">
+                                                        <Badge bg="orange" className="fw-normal">
+                                                            {photo.category_name || photo.category?.name || 'Photo'}
+                                                        </Badge>
+                                                        <Badge bg={badgeBg} className="fw-normal">
+                                                            {tier}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </motion.div>
-                                )) : (
+                                        </motion.div>
+                                    );
+                                }) : (
                                     <div className="w-100 text-center py-5">
                                         <p className="text-secondary fs-5">No photos found matching your criteria.</p>
                                     </div>
@@ -336,8 +377,11 @@ const Gallery = () => {
                                 style={{ maxHeight: '85vh' }}
                             />
                             
-                            <div className="glass-card mt-3 p-3 d-inline-flex align-items-center gap-3 rounded-pill position-absolute bottom-0 start-50 translate-middle-x mb-4">
+                            <div className="glass-card mt-3 p-3 d-inline-flex flex-wrap align-items-center gap-3 rounded-pill position-absolute bottom-0 start-50 translate-middle-x mb-4">
                                 <span className="text-white fw-bold px-3 d-none d-sm-block">{selectedPhoto.title}</span>
+                                <Badge bg={getHierarchyBadgeBg(getPhotoHierarchy(selectedPhoto, 0))} className="px-3 py-2 rounded-pill">
+                                    {getPhotoHierarchy(selectedPhoto, 0)}
+                                </Badge>
                                 <Button 
                                     variant="brand" 
                                     className="rounded-circle p-2" 

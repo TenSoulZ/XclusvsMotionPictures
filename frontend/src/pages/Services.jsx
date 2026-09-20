@@ -15,6 +15,9 @@ import ShareModal from '../components/ShareModal';
 const Services = () => {
     const services = [
         { id: 'video', icon: <FaVideo size={30}/>, title: 'Video Production', desc: 'Explainer, corporate, event coverage, and music videos.' },
+        { id: 'event_prod', icon: <FaVideo size={30}/>, title: 'Event Production', desc: 'Conferences, galas, concert coverage, and live event films.' },
+        { id: 'pro_video', icon: <FaVideo size={30}/>, title: 'Professional Video', desc: 'Music videos, narrative short films, and documentaries.' },
+        { id: 'commercial', icon: <FaBullhorn size={30}/>, title: 'Commercial Ad Production', desc: 'TV spots, social ad video packages, and motion graphics.' },
         { id: 'photo', icon: <FaCamera size={30}/>, title: 'Photography', desc: 'Commercial, event, and portrait photography projects.' },
         { id: 'web', icon: <FaGlobe size={30}/>, title: 'Web Developing', desc: 'Website design, professional web apps, and hosting services.' },
         { id: 'edit', icon: <FaEdit size={30}/>, title: 'Video Editing', desc: 'Expert post-production for clients needing a professional touch.' },
@@ -55,10 +58,25 @@ const Services = () => {
             { plan: 'Pro Cinematic', price: '750', features: ['Full Day Coverage (8 hrs)', '4K Cinematic Film + Teaser', 'Drone Aerial Footage', 'Professional Sound Design', '2 Revision Rounds'], popular: true },
             { plan: 'Enterprise', price: '1,500', features: ['Multi-Day / Multi-Camera', 'Full RAW Footage Delivery', 'Commercial Broadcast Rights', '4K Master + Custom Teasers', 'Unlimited Revisions'], popular: false }
         ],
+        event_prod: [
+            { plan: 'Basic Event', price: '400', features: ['Half-Day Coverage', 'Single HD Camera Angle', 'Edited Highlights Video', 'Raw Audio Feed'], popular: false },
+            { plan: 'Full Gala Coverage', price: '950', features: ['Full Event Coverage', 'Multi-Cam (2 Operators)', 'Full Multi-angle Highlight Film', 'On-site Interviews & Speeches', 'Drone Venue Shots'], popular: true },
+            { plan: 'Broadcast Event', price: '1,800', features: ['Multi-day Event Coverage', 'Full Production Crew (3+ Cams)', 'Live Video Feed Switching', 'Same-Day Reel Delivery', 'Full Broadcast Rights'], popular: false }
+        ],
+        pro_video: [
+            { plan: 'Indie Video', price: '450', features: ['Single Day Location Shoot', 'Music Video / Short Project', 'Cinematic 4K Resolution', 'Color Grading & Sound Mix', '1 Revision Round'], popular: false },
+            { plan: 'Pro Music Video', price: '950', features: ['Full Concept & Storyboard', 'Multi-location Shoot', 'Advanced Lighting & Effects', 'Drone Aerial Cinema', 'Teaser Cuts for Social Media'], popular: true },
+            { plan: 'Master Production', price: '2,000', features: ['High-Concept Studio Shoot', 'Full Creative Crew & Talent', 'VFX & Complex Post-production', 'Cinema Lenses & Anamorphic Kit', 'Full Commercial Distribution'], popular: false }
+        ],
+        commercial: [
+            { plan: 'Social Ad', price: '300', features: ['15-30s Promo Video', 'Optimized for Reels & TikTok', 'Text Callouts & Motion Graphics', 'Licensed Background Track'], popular: false },
+            { plan: 'Brand Campaign', price: '750', features: ['60s Brand Storytelling Ad', 'Voiceover Recording & Sync', 'High-impact Commercial Lighting', 'Multiple Aspect Ratio Cuts (16:9, 9:16, 1:1)', '2 Revision Rounds'], popular: true },
+            { plan: 'Broadcast TV Commercial', price: '1,800', features: ['TV Broadcast Quality Mastering', 'Full Campaign Ad Set (30s, 15s, 6s)', '2 Motion Graphics Ads Included', 'Actors & Voiceover Talent Setup', 'Full Commercial License'], popular: false }
+        ],
         photo: [
-            { plan: 'Starter', price: '200', features: ['2 Hours Session', '25 High-Res Edited Photos', 'Online Private Gallery', '1 Location'], popular: false },
-            { plan: 'Pro Shoot', price: '450', features: ['Half Day Session (4 hrs)', '60 High-Res Edited Photos', 'Skin & Color Retouching', 'Multiple Outfit Changes', 'Commercial Rights'], popular: true },
-            { plan: 'Full Event', price: '900', features: ['Full Day Coverage (8 hrs)', '150+ Edited Photos', 'Second Shooter Included', 'Fast 48-Hour Turnaround', 'Full Print Rights'], popular: false }
+            { plan: 'Focus', price: '200', features: ['2 Hours Session', '25 High-Res Edited Photos', 'Online Private Gallery', '1 Location'], popular: false },
+            { plan: 'Signature', price: '450', features: ['Half Day Session (4 hrs)', '60 High-Res Edited Photos', 'Skin & Color Retouching', 'Multiple Outfit Changes', 'Commercial Rights'], popular: true },
+            { plan: 'Legacy', price: '900', features: ['Full Day Coverage (8 hrs)', '150+ Edited Photos', 'Second Shooter Included', 'Fast 48-Hour Turnaround', 'Full Print Rights'], popular: false }
         ],
         web: [
             { plan: 'Landing Page', price: '400', features: ['Single Page Responsive Site', 'Modern UI/UX Design', 'Contact Form Integration', 'SEO Optimization', '1 Year Free Hosting'], popular: false },
@@ -75,15 +93,18 @@ const Services = () => {
             { plan: 'Studio Track', price: '300', features: ['Multi-track Studio Session', 'Vocal Tuning & Compression', 'Custom Background Music', 'High-Res WAV & MP3'], popular: true }
         ],
         live: [
-            { plan: 'Single Cam Stream', price: '500', features: ['Single HD Camera Setup', 'Live Audio Feed', 'Stream to 1 Platform (YouTube/FB)', 'Recorded Master Backup'], popular: false },
-            { plan: 'Multi-Cam Live', price: '1,200', features: ['3 Camera Switching Setup', 'Pro Wireless Mics', 'Custom Lower Thirds & Graphics', 'Simulcast to Multiple Platforms'], popular: true }
+            { plan: 'Basic', price: '125', features: ['Single 1080p HD Camera Angle', 'Wireless Audio Feed / Lapel Mic', 'Stream to 1 Platform (YouTube / FB)', 'HD Backup Recording Included', 'Basic Title Graphic & Lower Third'], popular: false },
+            { plan: 'Professional', price: '500', features: ['2-3 Multi-Camera HD Angles', 'Pro Multi-Channel Audio Mixer & Mics', 'Custom Branded Lower Thirds & Overlays', 'Dual-Platform Simulcasting', 'Dedicated Stream Operator & Master Recording'], popular: true },
+            { plan: 'Broadcast', price: '1,600', features: ['4+ Cinema Camera Angles (PTZ & Crane/Drone Ready)', 'Full Mobile Video Switcher Control Room', 'Studio Intercom Comms & Wireless Mics', 'Live Graphics, Scoreboards & Instant Replay', 'Multi-Platform 4K Stream + Master Recording & Technical Crew'], popular: false }
         ],
         brand: [
             { plan: 'Identity Kit', price: '300', features: ['Logo Design & Variations', 'Brand Color Palette', 'Typography & Fonts', 'Vector Master Files'], popular: false },
             { plan: 'Complete Brand', price: '700', features: ['Full Brand Style Guide', 'Social Media Templates', 'Business Card & Letterhead', 'Brand Usage Guidelines'], popular: true }
         ],
         marketing: [
-            { plan: 'Growth Campaign', price: '450', features: ['Social Media Strategy', 'Targeted Ad Campaign Setup', 'Monthly Analytics Report', 'SEO Audit & Optimization'], popular: true }
+            { plan: 'Starter', price: '250', features: ['12 Social Media Posts per month', 'Custom Graphic Design & Copywriting', 'Scheduled Publishing & Engagement', 'Monthly Performance Overview'], popular: false },
+            { plan: 'Growth', price: '550', features: ['18 Social Media Posts (including 2 Reels)', 'Strategic Content Calendar', 'Targeted Hashtag & Audience Strategy', 'Active Community Management & Stories', 'Bi-weekly Performance Strategy Session'], popular: true },
+            { plan: 'Performance', price: '1,200', features: ['Full Digital Calendar (Complete Month Coverage)', '6 High-Impact Reels per month', '2 Custom Motion Ads / Video Ad Campaigns', 'Complete Paid Ad Setup & Campaign Management', 'Weekly Analytics Reports & Growth Strategist'], popular: false }
         ]
     };
 
@@ -143,7 +164,7 @@ const Services = () => {
         <div className="services-page pt-5 bg-black text-white min-vh-100">
             <SEO 
                 title="Our Services" 
-                description="Professional video production, photography, web development, branding, and digital marketing. Explore our cinematic services."
+                description="Professional video production, photography, web development, branding, live streaming, and digital marketing."
                 url="/services"
             />
             <Container className="py-5 mt-5">
@@ -155,7 +176,59 @@ const Services = () => {
                     >
                         OUR <span className="text-orange">EXPERTISE</span>
                     </motion.h1>
-                    <p className="lead text-white-50">Select a service to see tailored pricing plans.</p>
+                    <p className="lead text-white-50">Select a service to see tailored packages and pricing plans.</p>
+                </div>
+
+                {/* Featured Production Pillars Section */}
+                <div className="mb-5 pb-4">
+                    <h4 className="text-orange fw-bold spacing-2 text-uppercase mb-4 text-center">FEATURED PRODUCTION PILLARS</h4>
+                    <Row className="g-4 justify-content-center">
+                        {[
+                            {
+                                id: 'event_prod',
+                                fallbackId: 'video',
+                                title: '1. Event Production',
+                                subtitle: 'Conferences, Galas & Live Shows',
+                                desc: 'Full multi-camera event coverage, high-fidelity audio capture, live switching, and dynamic recap films.',
+                                badge: 'Coverage & Galas'
+                            },
+                            {
+                                id: 'pro_video',
+                                fallbackId: 'video',
+                                title: '2. Professional Video',
+                                subtitle: 'Music Videos & Storytelling',
+                                desc: 'High-end music videos, narrative shorts, artist showcases, and documentaries shot on 4K/6K cinema gear.',
+                                badge: 'Music Videos & Shorts'
+                            },
+                            {
+                                id: 'commercial',
+                                fallbackId: 'video',
+                                title: '3. Commercial Ad Production',
+                                subtitle: 'Brand Ads & Motion Campaigns',
+                                desc: 'High-converting commercials, TV spots, social media ad video sets, and motion graphics design.',
+                                badge: 'TV & Digital Ads'
+                            }
+                        ].map((pillar, pIdx) => (
+                            <Col lg={4} md={6} key={pIdx}>
+                                <motion.div
+                                    whileHover={{ y: -8, scale: 1.02 }}
+                                    onClick={() => setSelectedService(defaultPlans[pillar.id] ? pillar.id : pillar.fallbackId)}
+                                    className={`glass-card p-4 h-100 border-0 cursor-pointer d-flex flex-column justify-content-between position-relative overflow-hidden ${selectedService === pillar.id ? 'border-orange shadow-lg' : ''}`}
+                                    style={{ background: 'linear-gradient(145deg, rgba(255,102,0,0.08) 0%, rgba(20,20,20,0.95) 100%)', cursor: 'pointer' }}
+                                >
+                                    <div>
+                                        <Badge bg="orange" className="mb-3 px-3 py-2 text-uppercase">{pillar.badge}</Badge>
+                                        <h4 className="fw-bold text-white mb-1">{pillar.title}</h4>
+                                        <h6 className="text-orange small mb-3">{pillar.subtitle}</h6>
+                                        <p className="text-white-50 small mb-4">{pillar.desc}</p>
+                                    </div>
+                                    <Button variant="outline-light" size="sm" className="rounded-pill align-self-start fw-bold">
+                                        VIEW PACKAGES →
+                                    </Button>
+                                </motion.div>
+                            </Col>
+                        ))}
+                    </Row>
                 </div>
 
                 <Row className="g-4 mb-5 pb-5" role="tablist" aria-label="Services selection">
@@ -198,7 +271,7 @@ const Services = () => {
                         transition={{ duration: 0.5 }}
                     >
                         <h2 className="display-4 fw-bold text-center mb-5">
-                            {services.find(s => s.id === selectedService).title.toUpperCase()} <span className="text-orange">PLANS</span>
+                            {(services.find(s => s.id === selectedService)?.title || 'SERVICE').toUpperCase()} <span className="text-orange">PLANS</span>
                         </h2>
                         
                         {(() => {
@@ -240,7 +313,7 @@ const Services = () => {
                                                 onClick={() => navigate('/contact', { 
                                                     state: { 
                                                         plan: tier.plan, 
-                                                        service: services.find(s => s.id === selectedService).title 
+                                                        service: services.find(s => s.id === selectedService)?.title || 'Service'
                                                     } 
                                                 })}
                                             >

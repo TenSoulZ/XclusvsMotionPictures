@@ -52,12 +52,26 @@ const Videos = () => {
             }
         }
     };
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalCount, setTotalCount] = useState(0);
-    const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState('All');
-    const [searchQuery, setSearchQuery] = useState('');
-    const pageSize = 12;
+    const [hierarchyFilter, setHierarchyFilter] = useState('All');
+
+    const getHierarchyTier = (video, index) => {
+        if (video.hierarchy) return video.hierarchy;
+        if (video.is_featured || index % 3 === 0) return 'Premier Showcase';
+        if (index % 2 === 0) return 'Featured Project';
+        return 'Standard Showcase';
+    };
+
+    const getHierarchyBadgeBg = (tier) => {
+        if (tier.includes('Premier')) return 'danger';
+        if (tier.includes('Featured')) return 'orange';
+        return 'secondary';
+    };
+
+    const filteredVideos = videos.filter((video, index) => {
+        if (hierarchyFilter === 'All') return true;
+        const tier = getHierarchyTier(video, index);
+        return tier.toLowerCase().includes(hierarchyFilter.toLowerCase());
+    });
 
     // Fetch categories on mount
     useEffect(() => {
@@ -170,15 +184,15 @@ const Videos = () => {
             </header>
 
             <Container className="py-5 position-relative z-2" style={{ marginTop: '-50px' }}>
-                {/* Filters and Search Bar - Floating Glass Card */}
+                {/* Filters, Hierarchy & Search Bar - Floating Glass Card */}
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                     className="glass-card p-4 rounded-4 mb-5 shadow-lg border-top border-orange border-opacity-25"
                 >
-                    <Row className="align-items-center g-4">
-                        <Col lg={8}>
+                    <Row className="align-items-center g-3 mb-3">
+                        <Col lg={7}>
                             <div className="d-flex flex-wrap gap-2">
                                 <Button 
                                     variant={selectedCategory === 'All' ? 'brand' : 'outline-light'}
@@ -187,7 +201,7 @@ const Videos = () => {
                                     aria-pressed={selectedCategory === 'All'}
                                     aria-label="Show all videos"
                                 >
-                                    All
+                                    All Categories
                                 </Button>
                                 {categories.map(cat => (
                                     <Button 
@@ -203,13 +217,24 @@ const Videos = () => {
                                 ))}
                             </div>
                         </Col>
-                        <Col lg={4}>
-                            <div className="search-bar bg-black bg-opacity-50 d-flex align-items-center px-3 py-2 rounded-pill border border-secondary border-opacity-25">
+                        <Col lg={5} className="d-flex gap-2">
+                            <select 
+                                className="form-select bg-black text-white border-secondary border-opacity-25 rounded-pill px-3 py-2 small"
+                                value={hierarchyFilter}
+                                onChange={(e) => setHierarchyFilter(e.target.value)}
+                                aria-label="Filter by Portfolio Hierarchy"
+                            >
+                                <option value="All">All Hierarchy Tiers</option>
+                                <option value="Premier">Premier Showcase (Tier 1)</option>
+                                <option value="Featured">Featured Projects (Tier 2)</option>
+                                <option value="Standard">Standard Showcase (Tier 3)</option>
+                            </select>
+                            <div className="search-bar bg-black bg-opacity-50 d-flex align-items-center px-3 py-2 rounded-pill border border-secondary border-opacity-25 flex-grow-1">
                                 <FaSearch className="text-secondary me-2" />
                                 <input 
                                     type="text" 
-                                    placeholder="Search videos..." 
-                                    className="bg-transparent border-0 text-white w-100 outline-none"
+                                    placeholder="Search..." 
+                                    className="bg-transparent border-0 text-white w-100 outline-none small"
                                     style={{ outline: 'none' }}
                                     value={searchQuery}
                                     onChange={handleSearchChange}
@@ -251,49 +276,70 @@ const Videos = () => {
                             transition={{ duration: 0.3 }}
                         >
                             <Row>
-                                {videos.length > 0 ? videos.map((video) => (
-                                    <Col md={6} lg={4} key={video.id} className="mb-4">
-                                        <motion.div 
-                                            variants={itemVariants}
-                                            className="video-card position-relative overflow-hidden rounded-4 glass-card p-0 border-0 shadow-sm h-100 glow-hover"
-                                            onClick={() => setSelectedVideo(video)}
-                                            onKeyDown={(e) => e.key === 'Enter' && setSelectedVideo(video)}
-                                            role="button"
-                                            tabIndex={0}
-                                            aria-label={`Watch ${video.title}`}
-                                        >
-                                            <div className="overflow-hidden position-relative" style={{ paddingTop: '56.25%' }}> {/* 16:9 Aspect Ratio */}
-                                                 <div className="position-absolute top-0 start-0 w-100 h-100">
-                                                    <VideoThumbnail video={video} className="img-cover w-100 h-100" style={{ filter: 'brightness(0.8)', transition: 'transform 0.5s ease' }} />
-                                                 </div>
-                                                
-                                                <div className="position-absolute top-50 start-50 translate-middle text-center z-1">
-                                                    <div className="play-btn-circle glass-card rounded-circle p-3 mb-2 hover-scale" style={{ width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                        <FaPlay className="ms-1 text-white" />
+                                {filteredVideos.length > 0 ? filteredVideos.map((video, idx) => {
+                                    const tier = getHierarchyTier(video, idx);
+                                    const badgeBg = getHierarchyBadgeBg(tier);
+                                    return (
+                                        <Col md={6} lg={4} key={video.id} className="mb-4">
+                                            <motion.div 
+                                                variants={itemVariants}
+                                                className="video-card position-relative overflow-hidden rounded-4 glass-card p-0 border-0 shadow-sm h-100 glow-hover"
+                                                onClick={() => setSelectedVideo(video)}
+                                                onKeyDown={(e) => e.key === 'Enter' && setSelectedVideo(video)}
+                                                role="button"
+                                                tabIndex={0}
+                                                aria-label={`Watch ${video.title}`}
+                                            >
+                                                <div className="overflow-hidden position-relative" style={{ paddingTop: '56.25%' }}> {/* 16:9 Aspect Ratio */}
+                                                     <div className="position-absolute top-0 start-0 w-100 h-100">
+                                                        <VideoThumbnail video={video} className="img-cover w-100 h-100" style={{ filter: 'brightness(0.8)', transition: 'transform 0.5s ease' }} />
+                                                     </div>
+                                                    
+                                                    <div className="position-absolute top-2 end-2 z-2 p-2">
+                                                        <Badge bg={badgeBg} className="rounded-pill px-3 py-1 shadow-sm text-uppercase small">
+                                                            {tier}
+                                                        </Badge>
+                                                    </div>
+
+                                                    <div className="position-absolute top-50 start-50 translate-middle text-center z-1">
+                                                        <div className="play-btn-circle glass-card rounded-circle p-3 mb-2 hover-scale" style={{ width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            <FaPlay className="ms-1 text-white" />
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Hover Overlay */}
+                                                    <div className="video-card-overlay position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-60 opacity-0 transition-opacity d-flex align-items-end p-4">
+                                                         <div className="w-100">
+                                                            <div className="d-flex gap-2 mb-2">
+                                                                <Badge bg="orange" className="rounded-pill px-3 py-1 text-white border-0">
+                                                                    {video.category?.name || 'Video'}
+                                                                </Badge>
+                                                                <Badge bg={badgeBg} className="rounded-pill px-3 py-1 text-white border-0">
+                                                                    {tier}
+                                                                </Badge>
+                                                            </div>
+                                                            <h5 className="text-white mb-1 fw-bold">{video.title}</h5>
+                                                            {video.description && (
+                                                                <p className="text-white-50 small mb-0 line-clamp-2">{video.description}</p>
+                                                            )}
+                                                         </div>
                                                     </div>
                                                 </div>
-                                                
-                                                {/* Hover Overlay */}
-                                                <div className="video-card-overlay position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-50 opacity-0 transition-opacity d-flex align-items-end p-4">
-                                                     <div className="w-100">
-                                                        <Badge bg="orange" className="mb-2 rounded-pill px-3 py-2 text-white border-0">
-                                                            {video.category?.name || 'Video'}
-                                                        </Badge>
-                                                        <h5 className="text-white mb-0 fw-bold">{video.title}</h5>
-                                                     </div>
+                                                <div className="p-3 bg-dark d-block d-md-none"> {/* Mobile Only Details underneath */}
+                                                    <div className="d-flex justify-content-between align-items-center mb-1">
+                                                        <h6 className="text-white mb-0">{video.title}</h6>
+                                                        <Badge bg={badgeBg} className="small">{tier}</Badge>
+                                                    </div>
+                                                    <small className="text-secondary">{video.category?.name}</small>
                                                 </div>
-                                            </div>
-                                            <div className="p-3 bg-dark d-block d-md-none"> {/* Mobile Only Details underneath */}
-                                                <h6 className="text-white mb-1">{video.title}</h6>
-                                                <small className="text-secondary">{video.category?.name}</small>
-                                            </div>
-                                        </motion.div>
-                                    </Col>
-                                )) : (
+                                            </motion.div>
+                                        </Col>
+                                    );
+                                }) : (
                                     <Col xs={12} className="text-center py-5">
                                         <div className="glass-card p-5 d-inline-block rounded-4">
                                             <p className="text-secondary fs-5 mb-0">No videos found matching your criteria.</p>
-                                            <Button variant="link" className="text-orange mt-2" onClick={() => {setSearchQuery(''); setSelectedCategory('All');}}>Clear Filters</Button>
+                                            <Button variant="link" className="text-orange mt-2" onClick={() => {setSearchQuery(''); setSelectedCategory('All'); setHierarchyFilter('All');}}>Clear Filters</Button>
                                         </div>
                                     </Col>
                                 )}
@@ -328,20 +374,30 @@ const Videos = () => {
                         )}
                     </div>
                 </Modal.Body>
-                <div className="bg-dark p-3 d-flex justify-content-between align-items-center">
-                     <div className="d-flex align-items-center gap-3">
-                        <h5 className="text-white mb-0">{selectedVideo?.title}</h5>
-                        <Button 
-                            variant="outline-light" 
-                            size="sm" 
-                            className="rounded-circle p-2 d-flex align-items-center justify-content-center"
-                            style={{ width: '35px', height: '35px' }}
-                            onClick={() => handleShare(selectedVideo)}
-                        >
-                            <FaShareAlt size={14} />
-                        </Button>
-                     </div>
-                    <Button variant="outline-secondary" size="sm" className="rounded-pill px-4" onClick={() => setSelectedVideo(null)}>Close Player</Button>
+                <div className="bg-dark p-4">
+                    <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                         <div className="d-flex align-items-center gap-3">
+                            <h4 className="text-white mb-0 fw-bold">{selectedVideo?.title}</h4>
+                            <Badge bg={selectedVideo ? getHierarchyBadgeBg(getHierarchyTier(selectedVideo, 0)) : 'orange'} className="px-3 py-2 rounded-pill">
+                                {selectedVideo ? getHierarchyTier(selectedVideo, 0) : 'Showcase'}
+                            </Badge>
+                         </div>
+                         <div className="d-flex gap-2">
+                             <Button 
+                                 variant="outline-light" 
+                                 size="sm" 
+                                 className="rounded-circle p-2 d-flex align-items-center justify-content-center"
+                                 style={{ width: '38px', height: '38px' }}
+                                 onClick={() => handleShare(selectedVideo)}
+                             >
+                                 <FaShareAlt size={14} />
+                             </Button>
+                             <Button variant="outline-secondary" size="sm" className="rounded-pill px-4" onClick={() => setSelectedVideo(null)}>Close</Button>
+                         </div>
+                    </div>
+                    <p className="text-white-50 mb-0">
+                        {selectedVideo?.description || 'High-end cinematic video project produced by Xclusvs Motion Pictures.'}
+                    </p>
                 </div>
             </Modal>
             

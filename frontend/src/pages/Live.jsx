@@ -196,6 +196,93 @@ const Live = () => {
                             </motion.div>
                         )}
 
+                        {/* Previous Broadcasts Section */}
+                        <motion.div 
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6 }}
+                            className="my-5 pt-4 border-top border-secondary border-opacity-25"
+                        >
+                            <div className="d-flex justify-content-between align-items-end mb-4">
+                                <div>
+                                    <h6 className="text-orange fw-bold spacing-2 text-uppercase mb-2">Broadcast Archive</h6>
+                                    <h3 className="display-6 fw-bold text-white mb-0">PREVIOUS <span className="text-orange">LIVES</span></h3>
+                                </div>
+                                <Badge bg="outline-light" className="border border-secondary text-secondary px-3 py-2">Last 3 Recorded Events</Badge>
+                            </div>
+
+                            <Row className="g-4">
+                                {[
+                                    {
+                                        id: 'past-1',
+                                        title: 'National Creative Arts Festival - Live Gala',
+                                        date: 'Sep 12, 2026',
+                                        views: '12.4K Views',
+                                        stream_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                                        thumbnail: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80',
+                                        description: 'Multi-camera high definition broadcast covering live musical performances, stage productions, and keynotes.',
+                                        is_live: false
+                                    },
+                                    {
+                                        id: 'past-2',
+                                        title: 'Tech Visionary Summit & Product Launch',
+                                        date: 'Aug 28, 2026',
+                                        views: '8.9K Views',
+                                        stream_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                                        thumbnail: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80',
+                                        description: 'Full mobile control room production featuring live switching, custom graphics, and virtual attendee engagement.',
+                                        is_live: false
+                                    },
+                                    {
+                                        id: 'past-3',
+                                        title: 'Cinematic Sound Stage Session & Concert',
+                                        date: 'Jul 19, 2026',
+                                        views: '15.1K Views',
+                                        stream_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                                        thumbnail: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=600&q=80',
+                                        description: 'Live studio recording with multi-channel audio mixing and dynamic lighting setup.',
+                                        is_live: false
+                                    }
+                                ].map((past) => (
+                                    <Col key={past.id} md={4}>
+                                        <div 
+                                            className="glass-card p-3 h-100 hover-transform cursor-pointer border-0 shadow-sm d-flex flex-column justify-content-between"
+                                            onClick={() => {
+                                                setSelectedStream(past);
+                                                window.scrollTo({ top: 150, behavior: 'smooth' });
+                                            }}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            <div>
+                                                <div className="ratio ratio-16x9 mb-3 rounded-3 overflow-hidden bg-dark position-relative">
+                                                    <img 
+                                                        src={past.thumbnail} 
+                                                        alt={past.title} 
+                                                        className="w-100 h-100 object-fit-cover opacity-75"
+                                                    />
+                                                    <div className="position-absolute top-50 start-50 translate-middle">
+                                                        <div className="rounded-circle bg-orange p-3 shadow-lg d-flex align-items-center justify-content-center" style={{ width: '50px', height: '50px' }}>
+                                                            <FaPlay className="text-white ms-1" />
+                                                        </div>
+                                                    </div>
+                                                    <div className="position-absolute bottom-0 start-0 p-2 w-100 bg-gradient-to-t from-black">
+                                                        <small className="text-white fw-bold">{past.date}</small>
+                                                    </div>
+                                                </div>
+                                                <h6 className="fw-bold text-white mb-2 line-clamp-2">{past.title}</h6>
+                                                <p className="small text-secondary mb-3 line-clamp-2">{past.description}</p>
+                                            </div>
+                                            <div className="d-flex justify-content-between align-items-center border-top border-secondary border-opacity-10 pt-2 mt-2">
+                                                <span className="small text-orange fw-bold">WATCH REPLAY →</span>
+                                                <small className="text-secondary">{past.views}</small>
+                                            </div>
+                                        </div>
+                                    </Col>
+                                ))}
+                            </Row>
+                        </motion.div>
+
                         <div className="text-center py-5">
                             <h3 className="fw-bold mb-4">Want to stream your own event?</h3>
                             <p className="text-secondary mb-5 mx-auto" style={{ maxWidth: '600px' }}>

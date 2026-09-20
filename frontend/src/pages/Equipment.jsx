@@ -37,9 +37,52 @@ const Equipment = () => {
         fetchEquipment();
     }, []);
 
+    const defaultEquipment = [
+        { id: 'd1', name: 'RED Komodo 6K Cinema Camera', category: 'Camera', description: 'Global shutter 6K cinema camera for high-end film and commercial productions.', image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=600&q=80' },
+        { id: 'd2', name: 'Sennheiser MKH416 Shotgun Mic', category: 'Audio', description: 'Industry standard supercardioid shotgun microphone for crystal clear location audio.', image: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=600&q=80' },
+        { id: 'd3', name: 'Aputure 600d Pro Daylight LED', category: 'Lighting', description: 'High-output point-source LED light capable of matching 1200W HMI fixtures.', image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=600&q=80' },
+        { id: 'd4', name: 'DJI Inspire 3 8K Drone', category: 'Drone', description: 'Full-frame 8K cinema drone with dual-operator control and RTK precision.', image: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80' },
+        { id: 'd5', name: 'Sony FX6 Full-Frame Cinema Line', category: 'Camera', description: 'Full-frame sensor camera with dual native ISO for low-light cinematography.', image: 'https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?auto=format&fit=crop&w=600&q=80' },
+        { id: 'd6', name: 'DZOFILM Vespid Prime Lens Set', category: 'Lens', description: 'Full-frame cine prime lenses providing organic flare and ultra-sharp coverage.', image: 'https://images.unsplash.com/photo-1617005082133-548c4dd27f35?auto=format&fit=crop&w=600&q=80' },
+        { id: 'd7', name: 'Blackmagic ATEM Mini Extreme ISO', category: 'Live Streaming', description: '8-input live switcher with broadcast recording and multi-platform streaming.', image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80' },
+        { id: 'd8', name: 'DJI RS 3 Pro Gimbal Stabilizer', category: 'Support', description: 'Automated axis locks with LiDAR focusing for smooth moving camera shots.', image: 'https://images.unsplash.com/photo-1589872737085-802657827ad6?auto=format&fit=crop&w=600&q=80' }
+    ];
+
+    const interleaveByDiversity = (items) => {
+        if (!items || items.length === 0) return items;
+        const grouped = {};
+        items.forEach(item => {
+            const cat = item.category || 'Other';
+            if (!grouped[cat]) grouped[cat] = [];
+            grouped[cat].push(item);
+        });
+        
+        const result = [];
+        const keys = Object.keys(grouped);
+        let added = true;
+        let idx = 0;
+        while (added) {
+            added = false;
+            for (const key of keys) {
+                if (grouped[key][idx]) {
+                    result.push(grouped[key][idx]);
+                    added = true;
+                }
+            }
+            idx++;
+        }
+        return result;
+    };
+
+    const displayEquipment = equipment.length > 0 ? equipment : defaultEquipment;
+
     const filteredEquipment = selectedCategory === 'All' 
-        ? equipment 
-        : equipment.filter(item => item.category === selectedCategory);
+        ? interleaveByDiversity(displayEquipment)
+        : displayEquipment.filter(item => item.category === selectedCategory);
+
+    const displayCategories = categories.length > 0 
+        ? categories 
+        : [...new Set(defaultEquipment.map(i => i.category))];
 
     const getCategoryIcon = (cat) => {
         switch(cat) {
@@ -92,7 +135,7 @@ const Equipment = () => {
                     >
                         All Gear
                     </motion.button>
-                    {categories.map(cat => (
+                    {displayCategories.map(cat => (
                         <motion.button
                             key={cat}
                             whileHover={{ scale: 1.05 }}

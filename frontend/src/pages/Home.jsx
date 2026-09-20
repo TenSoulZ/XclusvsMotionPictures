@@ -623,10 +623,10 @@ const Home = () => {
                     <Container className="py-5">
                         <div className="d-flex justify-content-between align-items-end mb-5">
                             <div>
-                                <h6 className="text-orange fw-bold spacing-2 text-uppercase mb-2">The Journal</h6>
-                                <h2 className="display-5 fw-bold text-white mb-0">LATEST <span className="text-white opacity-25">STORIES</span></h2>
+                                <h6 className="text-orange fw-bold spacing-2 text-uppercase mb-2">The Wall</h6>
+                                <h2 className="display-5 fw-bold text-white mb-0">LATEST <span className="text-white opacity-25">POSTS</span></h2>
                             </div>
-                            <Button href="/blog" variant="outline-light" className="d-none d-md-block px-4 py-2 text-decoration-none">VIEW ALL ARTICLES</Button>
+                            <Button href="/blog" variant="outline-light" className="d-none d-md-block px-4 py-2 text-decoration-none">EXPLORE THE WALL</Button>
                         </div>
 
                         <Row className="g-4">
@@ -668,12 +668,12 @@ const Home = () => {
                             ))}
                         </Row>
                         <div className="d-md-none text-center mt-5">
-                            <Button href="/blog" variant="outline-light" className="w-100 text-decoration-none">VIEW ALL ARTICLES</Button>
+                            <Button href="/blog" variant="outline-light" className="w-100 text-decoration-none">EXPLORE THE WALL</Button>
                         </div>
                     </Container>
                 ) : (
                     <div className="d-flex justify-content-center align-items-center h-100 w-100 py-5">
-                        <p className="text-secondary opacity-50">Loading journal entries...</p>
+                        <p className="text-secondary opacity-50">Loading wall posts...</p>
                     </div>
                 )}
             </section>
