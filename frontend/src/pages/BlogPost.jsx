@@ -145,12 +145,15 @@ const BlogPost = () => {
                             variant="link" 
                             className="text-orange text-decoration-none p-0 mb-4 d-flex align-items-center gap-2 spacing-1 fw-bold"
                         >
-                            <FaArrowLeft /> BACK TO JOURNAL
+                            <FaArrowLeft /> BACK TO THE WALL
                         </Button>
                         <h1 className="display-2 fw-bold text-white mb-4" style={{ maxWidth: '900px' }}>{post.title}</h1>
-                        <div className="d-flex align-items-center gap-4 text-secondary small">
+                        <div className="d-flex flex-wrap align-items-center gap-4 text-secondary small">
                              <span className="d-flex align-items-center gap-2"><FaCalendarAlt className="text-orange"/> {new Date(post.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                              <span className="d-flex align-items-center gap-2"><FaUser className="text-orange"/> {post.author_name}</span>
+                             <span className="badge bg-orange text-white rounded-pill px-3 py-1">
+                                {Math.max(1, Math.ceil((post.content || '').replace(/<[^>]*>?/gm, '').split(/\s+/).length / 200))} min read
+                             </span>
                         </div>
                     </motion.div>
                 </Container>
@@ -163,20 +166,26 @@ const BlogPost = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.4 }}
-                            className="blog-content text-white fs-5 lh-lg"
+                            className="blog-content text-white fs-5 lh-lg mb-5"
                             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
                         />
 
-                        <div className="d-flex justify-content-between align-items-center mt-5">
-                            <Button 
-                                variant="dark" 
-                                className="rounded-circle border-secondary" 
-                                aria-label="Share this post"
-                                onClick={handleShare}
-                            >
-                                <FaShareAlt size={16}/>
-                            </Button>
-                            <Button as={Link} to="/contact" variant="brand">WORK WITH US</Button>
+                        <div className="glass-card p-4 rounded-4 d-flex flex-wrap justify-content-between align-items-center gap-3 mt-5 border-top border-orange border-opacity-25">
+                            <div>
+                                <h6 className="text-white fw-bold mb-1">Enjoyed this story on The Wall?</h6>
+                                <p className="text-white-50 small mb-0">Share with your network or talk to our creative team.</p>
+                            </div>
+                            <div className="d-flex align-items-center gap-2">
+                                <Button 
+                                    variant="outline-light" 
+                                    className="rounded-pill px-4 py-2 d-flex align-items-center gap-2 small fw-bold" 
+                                    aria-label="Share this post"
+                                    onClick={handleShare}
+                                >
+                                    <FaShareAlt size={14}/> Share Post
+                                </Button>
+                                <Button as={Link} to="/contact" variant="brand" className="rounded-pill px-4 py-2 small fw-bold">BOOK A PROJECT</Button>
+                            </div>
                         </div>
                     </Col>
                 </Row>

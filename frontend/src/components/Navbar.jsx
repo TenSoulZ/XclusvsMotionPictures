@@ -93,7 +93,7 @@ const Navigation = () => {
                             <NavDropdown.Item as={Link} to="/gallery" active={location.pathname === '/gallery'} onClick={() => setExpanded(false)}>Gallery</NavDropdown.Item>
                         </NavDropdown>
 
-                        <Nav.Link as={Link} to="/blog" active={location.pathname.startsWith('/blog')} onClick={() => setExpanded(false)}>Blog</Nav.Link>
+                        <Nav.Link as={Link} to="/blog" active={location.pathname.startsWith('/blog')} onClick={() => setExpanded(false)}>The Wall</Nav.Link>
                         <Nav.Link as={Link} to="/equipment" active={location.pathname === '/equipment'} onClick={() => setExpanded(false)}>Our Gear</Nav.Link>
                         <Nav.Link as={Link} to="/live" active={location.pathname === '/live'} onClick={() => setExpanded(false)} className="d-flex align-items-center gap-2">
                             Live Broadcast

@@ -36,8 +36,8 @@ const Blog = () => {
     return (
         <div className="blog-page bg-black py-5 min-vh-100 mt-5">
             <SEO 
-                title="Blog" 
-                description="Stay updated with the latest news, tutorials, and behind-the-scenes stories from Xclusvs Motion Pictures."
+                title="The Wall" 
+                description="Explore stories, behind-the-scenes insights, industry trends, and creative updates on The Wall by Xclusvs Motion Pictures."
                 url="/blog"
             />
             
@@ -48,7 +48,7 @@ const Blog = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-orange fw-bold spacing-2 text-uppercase mb-2"
                     >
-                        Journal
+                        The Wall
                     </motion.h6>
                     <motion.h1 
                         initial={{ opacity: 0, y: 20 }}
@@ -56,7 +56,7 @@ const Blog = () => {
                         transition={{ delay: 0.1 }}
                         className="display-3 fw-bold text-white mb-4"
                     >
-                        LATEST <span className="text-secondary opacity-50">STORIES</span>
+                        LATEST <span className="text-secondary opacity-50">POSTS & STORIES</span>
                     </motion.h1>
                     
                     <Row className="justify-content-center">
@@ -71,7 +71,7 @@ const Blog = () => {
                                         <FaSearch aria-hidden="true" />
                                     </InputGroup.Text>
                                     <Form.Control 
-                                        placeholder="Search articles..." 
+                                        placeholder="Search posts on The Wall..." 
                                         className="bg-transparent border-0 text-white shadow-none"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}

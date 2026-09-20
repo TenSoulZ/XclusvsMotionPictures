@@ -33,6 +33,7 @@ const Footer = () => {
                         <ul className="list-unstyled text-secondary">
                             <li className="mb-2"><Link to="/gallery" className="text-decoration-none text-secondary hover-orange transition-all">Our Work</Link></li>
                             <li className="mb-2"><Link to="/services" className="text-decoration-none text-secondary hover-orange transition-all">Services</Link></li>
+                            <li className="mb-2"><Link to="/blog" className="text-decoration-none text-secondary hover-orange transition-all">The Wall</Link></li>
                             <li className="mb-2"><Link to="/contact" className="text-decoration-none text-secondary hover-orange transition-all">Get in Touch</Link></li>
                             <li className="mb-2"><Link to="/faq" className="text-decoration-none text-secondary hover-orange transition-all">FAQ</Link></li>
                             <li className="mb-2"><Link to="/disclaimer" className="text-decoration-none text-secondary hover-orange transition-all">Disclaimer</Link></li>

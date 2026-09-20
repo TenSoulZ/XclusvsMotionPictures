@@ -222,6 +222,28 @@ const Contact = () => {
                     </Col>
                 </Row>
 
+                {/* Interactive Instant Project Estimator */}
+                <Row className="justify-content-center mt-5">
+                    <Col lg={10}>
+                        <div className="glass-card p-4 p-md-5 rounded-4 border-top border-orange border-opacity-25">
+                            <div className="text-center mb-4">
+                                <h6 className="text-orange fw-bold spacing-2 text-uppercase mb-2">Instant Calculator</h6>
+                                <h3 className="display-6 fw-bold text-white mb-2">INTERACTIVE <span className="text-orange">PROJECT ESTIMATOR</span></h3>
+                                <p className="text-white-50">Select your scope and options below for an instant estimated budget range.</p>
+                            </div>
+
+                            <EstimatorWidget onApplyQuote={(quoteSubject, quoteMsg) => {
+                                setFormData(prev => ({
+                                    ...prev,
+                                    subject: quoteSubject,
+                                    message: quoteMsg
+                                }));
+                                window.scrollTo({ top: 300, behavior: 'smooth' });
+                            }} />
+                        </div>
+                    </Col>
+                </Row>
+
                 {/* Map Section */}
                 <Row className="justify-content-center mt-5">
                     <Col lg={10}>
@@ -243,6 +265,157 @@ const Contact = () => {
                     </Col>
                 </Row>
             </Container>
+        </div>
+    );
+};
+
+/**
+ * EstimatorWidget component - Interactive cost calculator for potential clients.
+ */
+const EstimatorWidget = ({ onApplyQuote }) => {
+    const [service, setService] = useState('Event Production');
+    const [duration, setDuration] = useState('Full Day');
+    const [addons, setAddons] = useState({
+        drone: true,
+        cineLens: false,
+        motionGraphics: true,
+        liveSwitching: false
+    });
+
+    const basePrices = {
+        'Event Production': 500,
+        'Professional Video (Music Video / Short)': 650,
+        'Commercial Ad Production': 600,
+        'Live Streaming Event': 500,
+        'Photography Session': 350
+    };
+
+    const durationMultipliers = {
+        'Half Day': 1.0,
+        'Full Day': 1.6,
+        'Multi Day': 2.8
+    };
+
+    const addonPrices = {
+        drone: 200,
+        cineLens: 150,
+        motionGraphics: 250,
+        liveSwitching: 300
+    };
+
+    const calculateTotal = () => {
+        const base = basePrices[service] || 500;
+        const mult = durationMultipliers[duration] || 1.0;
+        let addonSum = 0;
+        if (addons.drone) addonSum += addonPrices.drone;
+        if (addons.cineLens) addonSum += addonPrices.cineLens;
+        if (addons.motionGraphics) addonSum += addonPrices.motionGraphics;
+        if (addons.liveSwitching) addonSum += addonPrices.liveSwitching;
+
+        const total = Math.round((base * mult) + addonSum);
+        return {
+            min: Math.round(total * 0.9),
+            max: Math.round(total * 1.15)
+        };
+    };
+
+    const estimate = calculateTotal();
+
+    const handleApply = () => {
+        const selectedAddonsList = Object.keys(addons)
+            .filter(k => addons[k])
+            .map(k => k === 'drone' ? 'Drone Aerial Footage' : k === 'cineLens' ? 'Anamorphic/Cinema Lens Set' : k === 'motionGraphics' ? 'Motion Graphics & VFX' : 'Live Video Switching')
+            .join(', ');
+
+        const subject = `${service} Estimate ($${estimate.min} - $${estimate.max})`;
+        const message = `Hello XMP Team,\n\nI calculated an estimated project budget on your website:\n- Service: ${service}\n- Duration: ${duration}\n- Add-ons: ${selectedAddonsList || 'None'}\n- Estimated Price Range: $${estimate.min} - $${estimate.max}\n\nPlease contact me to confirm availability and discuss details.`;
+
+        onApplyQuote(subject, message);
+    };
+
+    return (
+        <div>
+            <Row className="g-4 align-items-center">
+                <Col md={6}>
+                    <Form.Group className="mb-4">
+                        <Form.Label className="text-white-50 small fw-bold">1. SERVICE TYPE</Form.Label>
+                        <Form.Select 
+                            value={service} 
+                            onChange={(e) => setService(e.target.value)}
+                            className="bg-black text-white border-secondary rounded-3 py-3"
+                        >
+                            <option value="Event Production">Event Production (Conferences & Galas)</option>
+                            <option value="Professional Video (Music Video / Short)">Professional Video (Music Video / Short)</option>
+                            <option value="Commercial Ad Production">Commercial Ad Production (TV & Digital Ads)</option>
+                            <option value="Live Streaming Event">Live Streaming Event</option>
+                            <option value="Photography Session">Photography Session</option>
+                        </Form.Select>
+                    </Form.Group>
+
+                    <Form.Group className="mb-4">
+                        <Form.Label className="text-white-50 small fw-bold">2. COVERAGE DURATION</Form.Label>
+                        <div className="d-flex gap-2">
+                            {['Half Day', 'Full Day', 'Multi Day'].map((dur) => (
+                                <Button 
+                                    key={dur}
+                                    variant={duration === dur ? 'brand' : 'outline-light'}
+                                    className="flex-grow-1 py-2 rounded-pill small fw-bold"
+                                    onClick={() => setDuration(dur)}
+                                >
+                                    {dur}
+                                </Button>
+                            ))}
+                        </div>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label className="text-white-50 small fw-bold mb-2">3. PRODUCTION ADD-ONS</Form.Label>
+                        <Row className="g-2">
+                            {[
+                                { key: 'drone', label: 'Drone Aerial Cinema (+$200)' },
+                                { key: 'cineLens', label: 'Cine Prime Lenses (+$150)' },
+                                { key: 'motionGraphics', label: 'Motion Graphics (+$250)' },
+                                { key: 'liveSwitching', label: 'Live Switcher Room (+$300)' }
+                            ].map((item) => (
+                                <Col sm={6} key={item.key}>
+                                    <div 
+                                        className={`p-3 rounded-3 cursor-pointer transition-all border ${addons[item.key] ? 'border-orange bg-black text-white shadow-sm' : 'border-secondary border-opacity-25 bg-dark text-white-50'}`}
+                                        onClick={() => setAddons(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
+                                        style={{ cursor: 'pointer' }}
+                                    >
+                                        <Form.Check 
+                                            type="checkbox" 
+                                            label={item.label}
+                                            checked={addons[item.key]}
+                                            onChange={() => {}}
+                                            className="small fw-bold pointer-events-none"
+                                        />
+                                    </div>
+                                </Col>
+                            ))}
+                        </Row>
+                    </Form.Group>
+                </Col>
+
+                <Col md={6}>
+                    <div className="glass-card p-4 text-center border-orange border-opacity-50 position-relative overflow-hidden" style={{ background: 'linear-gradient(145deg, #1f1f1f 0%, #0a0a0a 100%)' }}>
+                        <div className="position-absolute top-0 end-0 p-3 opacity-10 fs-1 text-orange">⚡</div>
+                        <h6 className="text-orange fw-bold spacing-2 text-uppercase mb-2">Estimated Investment</h6>
+                        <div className="display-4 fw-bold text-white mb-2">
+                            ${estimate.min} - <span className="text-orange">${estimate.max}</span>
+                        </div>
+                        <p className="text-white-50 small mb-4">Includes production setup, camera crew, raw media transfer, and initial edit pass.</p>
+
+                        <Button 
+                            variant="brand" 
+                            className="w-100 py-3 rounded-pill fw-bold shadow-lg"
+                            onClick={handleApply}
+                        >
+                            APPLY ESTIMATE TO CONTACT FORM ↓
+                        </Button>
+                    </div>
+                </Col>
+            </Row>
         </div>
     );
 };
